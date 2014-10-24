@@ -21,7 +21,7 @@ makeCacheMatrix <- function(x = matrix()) {
 	inv <- NULL
 	set <- function(y) {
 		x <<- y
-		inv <<- NULL
+		inv <<- NULL  # clean up inverse when a new value is set to 'x'
 	}
 	get <- function() x
 	setInv <- function(i) inv <<- i  
@@ -42,11 +42,12 @@ makeCacheMatrix <- function(x = matrix()) {
 #
 
 cacheSolve <- function(x, ...) {
-	inv <- x$getinv()
-	if (!is.null(inv)) {
+	inv <- x$getinv()  # check existing inverse
+	if (!is.null(inv)) { 
 		message("Cached matrix")
 		return (inv)
 	}
+    # if inverse is not cached, recalculate it
 	ret <- solve(x$get(), ...)
 	x$setinv(ret)
 	ret
@@ -56,11 +57,11 @@ cacheSolve <- function(x, ...) {
 #  
 # testSolve() 
 #
-# Should create a 1000x1000 matrix and its inverse
-# and set structures in the global environment as MA and IA respectively
+# Should create a 100x100 matrix and its inverse and set structures MA and IA
+# in the global environment, containing the matrix and its inverse respectively
 #
 
-testSolve <- function(d = 1000) {
+testSolve <- function(d = 100) {
   MA<<-makeCacheMatrix(matrix(rnorm(d*d),nrow=d,ncol=d))
   IA<<-cacheSolve(MA)
 }

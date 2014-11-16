@@ -83,7 +83,6 @@ data.mean.std.act <- cbind(rbind(subject_test, subject_train), rbind(y_test,y_tr
 # name the columns containing the subject id "id" and activity label "al". Assign names for the other columns as well, since that will facilitate the merge step
 colnames(data.mean.std.act) = c("id", "al", features[,2][mean.std.positions]) 
 
-
 activity_label.file <- paste(DATA.ROOT, "activity_labels.txt", sep="\\")
 activity_label <- read.table(activity_label.file)
 names(activity_label) <- c("al", "activity") # name de columns to facilitate 'merge' command. 
@@ -94,4 +93,10 @@ merged.data <- merge(data.mean.std.act, activity_label, by="al")
 # 4. Appropriately labels the data set with descriptive variable names. 
 #
 # This should be done by now. All data must have descriptive variable name assigned in the previous step.
+
+# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+#
+
+mean.data <- with(merged.data,aggregate(merged.data[,3:68], by=list(id, activity), FUN=mean))   
+colnames(mean.data)[1:2]=c("id","activity")
 

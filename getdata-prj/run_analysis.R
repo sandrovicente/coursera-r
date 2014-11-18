@@ -123,3 +123,4 @@ f.make.mean.name = function(x) {
 # and apply makeover on names referring to measurements only
 colnames(mean.data)[3:68] = sapply(colnames(mean.data)[3:68], f.make.mean.name)
 
+message("Script successfully executed. Check 'merged.data' and 'mean.data'")

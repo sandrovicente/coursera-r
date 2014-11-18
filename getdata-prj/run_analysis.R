@@ -28,7 +28,9 @@
 #
 # *IMPORTANT*: This should be changed to the location where the dataset was extracted.
 #
+
 DATA.ROOT <- "C:\\tmp\\data\\UCI_HAR_Dataset"  # Windows style root path
+RESULT <- "mean_file.txt" # default name
 SEPARATOR <- "\\"  # Windows style path separator
 
 #
@@ -87,7 +89,7 @@ subject_train <- read.table(subject_train.file)
 data.mean.std.act <- cbind(rbind(subject_test, subject_train), rbind(y_test, y_train), X_data.mean.std)
 
 # name the columns containing the subject id "id" and activity label "al". Assign names for the other columns as well, since that will facilitate the 'merge' ahead
-colnames(data.mean.std.act) = c("id", "al", features[,2][mean.std.positions]) 
+colnames(data.mean.std.act) = c("id", "al", features[,2][mean.std.positions]) # This does part of step 4!
 
 activity_label.file <- paste(DATA.ROOT, "activity_labels.txt", sep=SEPARATOR) # activity_labels.txt full path
 activity_label <- read.table(activity_label.file)
@@ -96,12 +98,12 @@ names(activity_label) <- c("al", "activity") # name the columns to facilitate 'm
 
 merged.data <- merge(data.mean.std.act, activity_label, by="al") # merge activity labels to the dataset with measurements
 
-# *IMPORTANT* After 'merge' command, rows/columns have been reordered.
+# *IMPORTANT* After 'merge' command, rows are probably reordered.
 
 #
 # 4. Appropriately labels the data set with descriptive variable names. 
 #
-# This was done in the previous step, before 'merge' function. All data must have variable names corresponding to the original 'features.txt' in the previous step.
+# This was done in the previous step, before 'merge' function. All measurements must have names corresponding to the original 'features.txt' in the previous step. Only the mean and std ones.
 
 # 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 #
@@ -115,12 +117,17 @@ colnames(mean.data)[1:2]=c("id","activity") # fix columns referring to 'id' and 
 
 # function to make a better names for measurements columns
 f.make.mean.name = function(x) { 
-  spl <- unlist(strsplit(make.names(x), "\\.")); # Breakdown names removing '(', ')' and '-' from labels. They are not "plyr-friendly".
+  spl <- unlist(strsplit(make.names(x), "\\.")); # Breakdown names removing '(', ')' and '-'. They are not "plyr-friendly".
   spl <- spl[spl != ""]; # empty parts are removed
   paste(c("mean","of",spl), collapse=".") # join parts using '.' ("plyr-friendly") and include prefix 'mean.of'
 }
 
-# and apply makeover on names referring to measurements only
+# and apply makeover on names referring to measurements only: columns 3 to 68
 colnames(mean.data)[3:68] = sapply(colnames(mean.data)[3:68], f.make.mean.name)
 
 message("Script successfully executed. Check 'merged.data' and 'mean.data'")
+
+result.file <- paste(DATA.ROOT, RESULT, sep=SEPARATOR) # result file full location
+write.table(mean.data, file=result.file, row.names=F)
+
+message("Dataset 'mean.data' written into ", result.file)

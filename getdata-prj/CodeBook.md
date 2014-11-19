@@ -1,6 +1,6 @@
 # Code Book
 
-### Input Data Description
+### Input Data Summary
 
 The dataset analyser summarizes data collected from accelerometers from Sansung Galaxy S Smartphones.
 
@@ -13,24 +13,24 @@ This data contains results of experiments carried out with a group of 30 volutee
 The data to be analysed is presented as:
 
 * A 561-feature vector with time and frequency domain variables. 
-* Its activity label (WALKING, SITTING, etc) 
-* An identifier of the subject who carried out the experiment.
+* Its activity label (1 for WALKING, 4 for SITTING, etc) 
+* An identifier of the subject who carried out the experiment (1-30).
 
-This data is normalized, splitted across several files, divided into 2 groups:
+This data is normalized, splitted across several files, divided into 2 main groups:
 
 **Train:**
 
-* 'train/X_train.txt': Training set (561-fature vector with time and frequency domain variables).
+* 'train/X_train.txt': Training set (561-feature vector with time and frequency domain variables).
 * 'train/y_train.txt': Training activity labels (1-6) 
-* 'train/subject_train.txt: identifier for the subjects in training data
+* 'train/subject_train.txt: identifier for the subjects in training data (1-30)
 
 **Test:**
 
 * 'test/X_test.txt': Testing set (the 561-feature vector for tests).
 * 'test/y_test.txt': Testing activity labels (1-6). 
-* 'test/subject_test.txt: identifier for the subjects in test data
+* 'test/subject_test.txt: identifier for the subjects in test data (1-30)
 
-Also contains a file associating activity labels to names:
+The data also comprises a file associating activity labels to names:
 
 * 'activity_labels.txt'
 
@@ -50,22 +50,25 @@ The generated tidy dataset should contain the average of the variables (represen
 
 Run analysis reads all the files mentioned in the section above. The following steps are performed:
 
-1. Merge of rows from the feature vectors contained in 'test/X_test.txt' and 'train/X_train.txt'
+1. Merge rows from the feature vectors contained in 'test/X_test.txt' and 'train/X_train.txt', in this order.
 
 2. Columns of the feature vectors corresponding to standard deviation and mean measurements are selected.  
  1. This is performed by identifying the names of the features from the file 'features.txt' which contains 'std()' and 'mean()';
- 2. The names of the features are ordered following the order of the columns of the feature vectors from X_test / X_train;
- 3. The indexes of the features corresponding to 'std()' and 'mean()' are used to filter the corresponding columns on the feature vectors.
+ 2. The names of the features are ordered following the order of the columns of the feature vectors in X_test / X_train;
+ 3. The indexes of the features corresponding to 'std()' and 'mean()' are used to filter the corresponding columns in the feature vectors;
+ 4. The other columns in the feature vectors are discarded.
 
-3. The activities, contained in 'test/y_test.txt' and 'train/y_train.txt' are assigned to the feature vectores as an additional column, named 'al' (activity label).
+3. The activities, described by identifiers contained in 'test/y_test.txt' and 'train/y_train.txt', are assigned to the feature vectors as an additional column, named 'al' (activity label).
 
 4. The subjects identifiers, contained in 'test/subject_test.txt' and 'train/subject_train.txt', are also added to the feature vectors as another extra column 'id'.
 
-5. The resulting feature vector, containing 'id' and 'al', is associated to the activity names, contained in 'activity_labels.txt' through the use of 'merge' function.
+5. The resulting feature vectors, including 'id' and 'al' columns, are matched to the activity names, contained in 'activity_labels.txt' through the use of 'merge' function. 'al' is the key to associate activity names to the feature vectors. 
 
-6. The result is a dataset containing all the previous columns (all mean and std features, 'id' and 'al') plus a new column 'activity' with the activity name.
+6. The result is a dataset containing all the previous columns ('mean()' and 'std()' features together with 'id' and 'al') plus a new column 'activity' with the corresponding activity name. 
 
-7. This result is aggregated by 'id' and 'activity' (the column 'al' is discarded) in order to obtain the mean of the feature values per subject ('id') and activity.
+7. The 'aggregate' function is executed, performing the function 'mean' on feature values regarding each combination of subject ('id') and activity. The 'al' column is discarded in the process.
+
+8. The resulting dataset contains a single combination of subject ('id') and activity per row. Each row contains the means of the values of the variables 'mean()' and 'std()' of the original feature vector. The mean is calculated for the corresponding combination of subject and activity of the row.
 
 ### Running 'run_analysis.R'
 
@@ -82,10 +85,10 @@ The dataset files should be placed in a specific folder, named DATA.ROOT. Inside
 
 DATA.ROOT folder should be set in 'run_analysis.R' before running the script.
 
-Also the variable SEPARATOR should be set with the file path separator used by the operating system ('\\\\' for Windows or '/' for Unix / Mac OS X)
+Also, the variable SEPARATOR should be set with the file path separator used by the operating system ('\\\\' for Windows or '/' for Unix or Mac OS X)
 
-The RESULT can be set with the name of the data file containing the results. 
-The file is generated in DATA.ROOT.
+The RESULT may be set with the name of the data file containing the results. The default value is 'mean_file.txt'
+The result file is generated in DATA.ROOT.
 
 More details on executing 'run_analysis.R' can be found in 'README.md'. 
 

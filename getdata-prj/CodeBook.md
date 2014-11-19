@@ -67,5 +67,95 @@ Run analysis reads all the files mentioned in the section above. The following s
 
 7. This result is aggregated by 'id' and 'activity' (the column 'al' is discarded) in order to obtain the mean of the feature values per subject ('id') and activity.
 
+### Running 'run_analysis.R'
+
+The dataset files should be placed in a specific folder, named DATA.ROOT. Inside this folder, they should be organized as follows:
+
+* DATA.ROOT/activity_labels.txt
+* DATA.ROOT/features.txt
+* DATA.ROOT/train/X_train.txt
+* DATA.ROOT/train/y_train.txt 
+* DATA.ROOT/train/subject_train.txt
+* DATA.ROOT/test/X_test.txt
+* DATA.ROOT/test/y_test.txt
+* DATA.ROOT/test/subject_test.txt
+
+DATA.ROOT folder should be set in 'run_analysis.R' before running the script.
+
+Also the variable SEPARATOR should be set with the file path separator used by the operating system ('\\\\' for Windows or '/' for Unix / Mac OS X)
+
+The RESULT can be set with the name of the data file containing the results. 
+The file is generated in DATA.ROOT.
+
+More details on executing 'run_analysis.R' can be found in 'README.md'. 
+
 ### Resulting Variables
 
+"id" - Subject identification (1-30) 
+"activity" - Activity name (WALKING, WALKING UPSTAIRS, WALKING DOWNSTAIRS, SITTING, STANDING and LAYING)
+"mean.of.tBodyAcc.mean.X" - mean of means for measures from accelerometer for body on X axis 
+"mean.of.tBodyAcc.mean.Y" - same as above for Y axis
+"mean.of.tBodyAcc.mean.Z" - same as above for Z axis
+"mean.of.tBodyAcc.std.X" - mean of standard deviations from accelerometer body on X axis
+"mean.of.tBodyAcc.std.Y" - same as above for Y axis
+"mean.of.tBodyAcc.std.Z" - same as above for Z axis
+"mean.of.tGravityAcc.mean.X" - mean of means for measures for measures from accelerometer for gravity on X axis 
+"mean.of.tGravityAcc.mean.Y" - same as above for Y axis
+"mean.of.tGravityAcc.mean.Z" - same as above for Z axis 
+"mean.of.tGravityAcc.std.X" - mean of standard deviations for measures from accelerometer for gravity on X axis  
+"mean.of.tGravityAcc.std.Y"  - same as above for Y axis
+"mean.of.tGravityAcc.std.Z"  - same as above for Z axis
+"mean.of.tBodyAccJerk.mean.X" - mean of measores 
+"mean.of.tBodyAccJerk.mean.Y" 
+"mean.of.tBodyAccJerk.mean.Z"
+"mean.of.tBodyAccJerk.std.X"
+"mean.of.tBodyAccJerk.std.Y"
+"mean.of.tBodyAccJerk.std.Z"
+"mean.of.tBodyGyro.mean.X"
+"mean.of.tBodyGyro.mean.Y"
+"mean.of.tBodyGyro.mean.Z"
+"mean.of.tBodyGyro.std.X"
+"mean.of.tBodyGyro.std.Y"
+"mean.of.tBodyGyro.std.Z"
+"mean.of.tBodyGyroJerk.mean.X"
+"mean.of.tBodyGyroJerk.mean.Y"
+"mean.of.tBodyGyroJerk.mean.Z"
+"mean.of.tBodyGyroJerk.std.X"
+"mean.of.tBodyGyroJerk.std.Y"
+"mean.of.tBodyGyroJerk.std.Z"
+"mean.of.tBodyAccMag.mean"
+"mean.of.tBodyAccMag.std"
+"mean.of.tGravityAccMag.mean"
+"mean.of.tGravityAccMag.std"
+"mean.of.tBodyAccJerkMag.mean"
+"mean.of.tBodyAccJerkMag.std"
+"mean.of.tBodyGyroMag.mean"
+"mean.of.tBodyGyroMag.std"
+"mean.of.tBodyGyroJerkMag.mean"
+"mean.of.tBodyGyroJerkMag.std"
+"mean.of.fBodyAcc.mean.X"
+"mean.of.fBodyAcc.mean.Y"
+"mean.of.fBodyAcc.mean.Z"
+"mean.of.fBodyAcc.std.X"
+"mean.of.fBodyAcc.std.Y"
+"mean.of.fBodyAcc.std.Z"
+"mean.of.fBodyAccJerk.mean.X"
+"mean.of.fBodyAccJerk.mean.Y"
+"mean.of.fBodyAccJerk.mean.Z"
+"mean.of.fBodyAccJerk.std.X"
+"mean.of.fBodyAccJerk.std.Y"
+"mean.of.fBodyAccJerk.std.Z"
+"mean.of.fBodyGyro.mean.X"
+"mean.of.fBodyGyro.mean.Y"
+"mean.of.fBodyGyro.mean.Z"
+"mean.of.fBodyGyro.std.X"
+"mean.of.fBodyGyro.std.Y"
+"mean.of.fBodyGyro.std.Z"
+"mean.of.fBodyAccMag.mean"
+"mean.of.fBodyAccMag.std"
+"mean.of.fBodyBodyAccJerkMag.mean"
+"mean.of.fBodyBodyAccJerkMag.std"
+"mean.of.fBodyBodyGyroMag.mean"
+"mean.of.fBodyBodyGyroMag.std"
+"mean.of.fBodyBodyGyroJerkMag.mean"
+"mean.of.fBodyBodyGyroJerkMag.std"

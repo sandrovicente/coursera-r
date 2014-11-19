@@ -93,69 +93,69 @@ More details on executing 'run_analysis.R' can be found in 'README.md'.
 
 "id" - Subject identification (1-30) 
 "activity" - Activity name (WALKING, WALKING UPSTAIRS, WALKING DOWNSTAIRS, SITTING, STANDING and LAYING)
-"mean.of.tBodyAcc.mean.X" - mean of means for measures from accelerometer for body on X axis 
+"mean.of.tBodyAcc.mean.X" - mean of means for measures from accelerometer for body on X axis (time domain)
 "mean.of.tBodyAcc.mean.Y" - same as above for Y axis
 "mean.of.tBodyAcc.mean.Z" - same as above for Z axis
-"mean.of.tBodyAcc.std.X" - mean of standard deviations from accelerometer body on X axis
+"mean.of.tBodyAcc.std.X" - mean of standard deviations from accelerometer body on X axis (time domain)
 "mean.of.tBodyAcc.std.Y" - same as above for Y axis
 "mean.of.tBodyAcc.std.Z" - same as above for Z axis
-"mean.of.tGravityAcc.mean.X" - mean of means for measures for measures from accelerometer for gravity on X axis 
+"mean.of.tGravityAcc.mean.X" - mean of means for measures for measures from accelerometer for gravity on X axis (time domain)
 "mean.of.tGravityAcc.mean.Y" - same as above for Y axis
 "mean.of.tGravityAcc.mean.Z" - same as above for Z axis 
-"mean.of.tGravityAcc.std.X" - mean of standard deviations for measures from accelerometer for gravity on X axis  
+"mean.of.tGravityAcc.std.X" - mean of standard deviations for measures from accelerometer for gravity on X axis  (time domain)
 "mean.of.tGravityAcc.std.Y"  - same as above for Y axis
 "mean.of.tGravityAcc.std.Z"  - same as above for Z axis
-"mean.of.tBodyAccJerk.mean.X" - mean of measores 
-"mean.of.tBodyAccJerk.mean.Y" 
-"mean.of.tBodyAccJerk.mean.Z"
-"mean.of.tBodyAccJerk.std.X"
-"mean.of.tBodyAccJerk.std.Y"
-"mean.of.tBodyAccJerk.std.Z"
-"mean.of.tBodyGyro.mean.X"
-"mean.of.tBodyGyro.mean.Y"
-"mean.of.tBodyGyro.mean.Z"
-"mean.of.tBodyGyro.std.X"
-"mean.of.tBodyGyro.std.Y"
-"mean.of.tBodyGyro.std.Z"
-"mean.of.tBodyGyroJerk.mean.X"
-"mean.of.tBodyGyroJerk.mean.Y"
-"mean.of.tBodyGyroJerk.mean.Z"
-"mean.of.tBodyGyroJerk.std.X"
-"mean.of.tBodyGyroJerk.std.Y"
-"mean.of.tBodyGyroJerk.std.Z"
-"mean.of.tBodyAccMag.mean"
-"mean.of.tBodyAccMag.std"
-"mean.of.tGravityAccMag.mean"
-"mean.of.tGravityAccMag.std"
-"mean.of.tBodyAccJerkMag.mean"
-"mean.of.tBodyAccJerkMag.std"
-"mean.of.tBodyGyroMag.mean"
-"mean.of.tBodyGyroMag.std"
-"mean.of.tBodyGyroJerkMag.mean"
-"mean.of.tBodyGyroJerkMag.std"
-"mean.of.fBodyAcc.mean.X"
-"mean.of.fBodyAcc.mean.Y"
-"mean.of.fBodyAcc.mean.Z"
-"mean.of.fBodyAcc.std.X"
-"mean.of.fBodyAcc.std.Y"
-"mean.of.fBodyAcc.std.Z"
-"mean.of.fBodyAccJerk.mean.X"
-"mean.of.fBodyAccJerk.mean.Y"
-"mean.of.fBodyAccJerk.mean.Z"
-"mean.of.fBodyAccJerk.std.X"
-"mean.of.fBodyAccJerk.std.Y"
-"mean.of.fBodyAccJerk.std.Z"
-"mean.of.fBodyGyro.mean.X"
-"mean.of.fBodyGyro.mean.Y"
-"mean.of.fBodyGyro.mean.Z"
-"mean.of.fBodyGyro.std.X"
-"mean.of.fBodyGyro.std.Y"
-"mean.of.fBodyGyro.std.Z"
-"mean.of.fBodyAccMag.mean"
-"mean.of.fBodyAccMag.std"
-"mean.of.fBodyBodyAccJerkMag.mean"
-"mean.of.fBodyBodyAccJerkMag.std"
-"mean.of.fBodyBodyGyroMag.mean"
-"mean.of.fBodyBodyGyroMag.std"
-"mean.of.fBodyBodyGyroJerkMag.mean"
-"mean.of.fBodyBodyGyroJerkMag.std"
+"mean.of.tBodyAccJerk.mean.X" - mean of means for measures of accelerometer jerks on X axis (time domain)
+"mean.of.tBodyAccJerk.mean.Y"  - same as above for Y axis
+"mean.of.tBodyAccJerk.mean.Z"  - same as above for Z axis
+"mean.of.tBodyAccJerk.std.X"  - mean of standard deviations for measures from accelerometers for jerks on X axis (time domain)
+"mean.of.tBodyAccJerk.std.Y"  - same as above for Y axis
+"mean.of.tBodyAccJerk.std.Z"  - same as above for Z axis
+"mean.of.tBodyGyro.mean.X"  - mean of means for measures from gyroscope body on X axis (time domain)
+"mean.of.tBodyGyro.mean.Y"  - same as above for Y axis
+"mean.of.tBodyGyro.mean.Z"  - same as above for Z axis
+"mean.of.tBodyGyro.std.X"  - mean of standard deviations for measures from gyroscope body on X axis (time domain)
+"mean.of.tBodyGyro.std.Y"  - same as above for Y axis
+"mean.of.tBodyGyro.std.Z"  - same as above for Z axis
+"mean.of.tBodyGyroJerk.mean.X"  - mean of means for measures from gyroscope jerks on X axis (time domain)
+"mean.of.tBodyGyroJerk.mean.Y"  - same as above for Y axis
+"mean.of.tBodyGyroJerk.mean.Z"  - same as above for Z axis
+"mean.of.tBodyGyroJerk.std.X"  - mean of standard deviations for measures from gyroscope jerks on X axis (time domain)
+"mean.of.tBodyGyroJerk.std.Y"  - same as above for Y axis
+"mean.of.tBodyGyroJerk.std.Z"  - same as above for Z axis
+"mean.of.tBodyAccMag.mean" - mean of means of linear acceleration measurements (involving X, Y and Z axis) on body (time domain)
+"mean.of.tBodyAccMag.std" - mean of standard deviations of linear acceleration measurements (X, Y and Z axis) on body (time domain)
+"mean.of.tGravityAccMag.mean" - mean of means of linear acceleration measurements (involving X, Y and Z axis) on gravity (time domain)
+"mean.of.tGravityAccMag.std" - mean of standard deviations of linear acceleration measurements (X, Y and Z axis) on gravity (time domain)
+"mean.of.tBodyAccJerkMag.mean" - mean of means of linear acceleration measurements for jerk signals on body (time domain)
+"mean.of.tBodyAccJerkMag.std" - mean of standard deviations on linear acceleration measurements for jerk signals on body (time domain)
+"mean.of.tBodyGyroMag.mean" - mean of means of gyroscope signals using Euclidian norm (all axis, time domain)
+"mean.of.tBodyGyroMag.std" - mean of standard deviations of gyroscope signals using Euclidian norm (all axis, time domain)
+"mean.of.tBodyGyroJerkMag.mean" - mean of means of gyroscope signals for jerks using Euclidian norm (all axis, time domain)
+"mean.of.tBodyGyroJerkMag.std" - mean of standard deviations of gyroscope signals for jerks using Euclidian norm (all axis, time domain)
+"mean.of.fBodyAcc.mean.X"  - mean of means for measures from accelerometer for body on X axis (frequency domain)
+"mean.of.fBodyAcc.mean.Y"  - same as above for Y axis 
+"mean.of.fBodyAcc.mean.Z"  - same as above for Z axis
+"mean.of.fBodyAcc.std.X"  - mean of standard deviations from accelerometer body on X axis (frequency domain)
+"mean.of.fBodyAcc.std.Y"  - same as above for Y axis
+"mean.of.fBodyAcc.std.Z"  - same as above for Z axis
+"mean.of.fBodyAccJerk.mean.X"  - mean of means for measures of accelerometer jerks on X axis (frequency domain)
+"mean.of.fBodyAccJerk.mean.Y"  - same as above for Y axis
+"mean.of.fBodyAccJerk.mean.Z"  - same as above for Z axis
+"mean.of.fBodyAccJerk.std.X"  - mean of standard deviations for measures from accelerometers for jerks on X axis (frequency domain)
+"mean.of.fBodyAccJerk.std.Y"  - same as above for Y axis
+"mean.of.fBodyAccJerk.std.Z"  - same as above for Z axis
+"mean.of.fBodyGyro.mean.X"    - mean of means for measures from gyroscope body on X axis (frequency domain)
+"mean.of.fBodyGyro.mean.Y"  - same as above for Y axis
+"mean.of.fBodyGyro.mean.Z"  - same as above for Z axis
+"mean.of.fBodyGyro.std.X"  - mean of standard deviations for measures from gyroscope body on X axis (frequency domain)
+"mean.of.fBodyGyro.std.Y"  - same as above for Y axis
+"mean.of.fBodyGyro.std.Z"  - same as above for Z axis
+"mean.of.fBodyAccMag.mean" - mean of means of linear acceleration measurements (involving X, Y and Z axis) on body (frequency domain)   
+"mean.of.fBodyAccMag.std" - mean of standard deviations of linear acceleration measurements (X, Y and Z axis) on body (frequency domain)
+"mean.of.fBodyBodyAccJerkMag.mean" - mean of means of linear acceleration measurements for jerk signals on body (frequency domain)               
+"mean.of.fBodyBodyAccJerkMag.std" - mean of standard deviations on linear acceleration measurements for jerk signals on body (frequency domain)  
+"mean.of.fBodyBodyGyroMag.mean" - mean of means of gyroscope signals using Euclidian norm (all axis, frequency domain)                           
+"mean.of.fBodyBodyGyroMag.std" - mean of standard deviations of gyroscope signals using Euclidian norm (all axis, frequency domain)              
+"mean.of.fBodyBodyGyroJerkMag.mean" - mean of means of gyroscope signals for jerks using Euclidian norm (all axis, frequency domain)             
+"mean.of.fBodyBodyGyroJerkMag.std" - mean of standard deviations of gyroscope signals for jerks using Euclidian norm (all axis, frequency domain)

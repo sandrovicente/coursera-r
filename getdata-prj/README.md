@@ -4,7 +4,7 @@
 
 Only one script executes all steps 1-5: **run_analysis.R**
 
-Please find more information on the tidy data generated in CodeBook.md.
+Please find more information about the tidy data generated in CodeBook.md.
 
 ### Running the analysis
 
@@ -12,14 +12,14 @@ Please find more information on the tidy data generated in CodeBook.md.
  
 https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 
-2- On file **'run_analysis.R'**, edit the lines containing 
+2- In the file **'run_analysis.R'**, edit the lines containing 
 
 * **DATA.ROOT** <- root of the location where dataset was extracted. 
     *e.g.* "C:\\tmp\\data\\UCI_HAR_Dataset" (Windows) or "~/work/data/UCI_HAR_Dataset" (Mac OS X)
 
-* **SEPARATOR** <- separator used in paths: '\\\\' for Windows, '/' for Unix / Mac OS X
+* **SEPARATOR** <- separator used in paths: '\\\\' for Windows, '/' for Unix or Mac OS X
 
-* **RESULT** <- name of file were the generated tidy dataset will be written. 
+* **RESULT** <- name of file were the generated tidy dataset will be written. The folder is defined by **DATA.ROOT**
 
 3- Run 'run_analysis.R' script: From R prompt, set the working directory as the location containing 'run_analysis.R' and use:
 
@@ -27,7 +27,7 @@ https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Datas
 
   Another way is to give the full path: 
 
-> source("<full_path_to_script/>run_analysis.R")
+> source("/full/path/to/script/run_analysis.R")
 
 4- If everything goes well, the following message is displayed:
 
@@ -37,6 +37,6 @@ https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Datas
 
 * 'merged.data' contains the data obtained at step 4: Means and std measurements with activity labels.
 
-* 'mean.data' contains the data obtained at step 5: Tidy dataset with average of each variable for each activity and subject from step 4.
+* 'mean.data' contains the data obtained at step 5: Tidy dataset with averages of values from the feature vectors concerning standard deviations and means, aggregated per activity and subject.
 
-5- Check results written in the indicated file.
+5- Check results written in the result txt file.

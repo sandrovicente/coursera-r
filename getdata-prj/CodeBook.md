@@ -87,7 +87,7 @@ DATA.ROOT folder should be set in 'run_analysis.R' before running the script.
 
 Also, the variable SEPARATOR should be set with the file path separator used by the operating system ('\\\\' for Windows or '/' for Unix or Mac OS X)
 
-The RESULT may be set with the name of the data file containing the results. The default value is 'mean_file.txt'
+The RESULT may be set with the name of the data file containing the results. The default value is 'mean_file.txt'.
 The result file is generated in DATA.ROOT.
 
 More details on executing 'run_analysis.R' can be found in 'README.md'. 

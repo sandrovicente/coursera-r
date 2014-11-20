@@ -29,9 +29,10 @@
 # *IMPORTANT*: This should be changed to the location where the dataset was extracted.
 #
 
-DATA.ROOT <- "C:\\tmp\\data\\UCI_HAR_Dataset"  # Windows style root path
-RESULT <- "mean_file.txt" # default name
+DATA.ROOT <- ".\\UCI_HAR_Dataset"  # Windows style root path. Directory in folder where the script is located
 SEPARATOR <- "\\"  # Windows style path separator
+
+RESULT <- "mean_file.txt" # default name for results. Will be generated under DATA.ROOT
 
 #
 # 1. Merge test and training feature vectors

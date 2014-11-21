@@ -6,5 +6,9 @@ baltimore.em <- NEI[NEI$fips == "24510",]
 
 total.emissions <- sapply(split(baltimore.em$Emissions, baltimore.em$year), sum)
 
-plot(attributes(total.emissions)[[1]], total.emissions, main="Total emissions of PM2.5 in Baltimore", xlab="years")
+png("plot2.png", width=480, height=480, units="px")
+
+plot(attributes(total.emissions)[[1]], total.emissions, main="Total emissions in Baltimore", ylab="PM2.5 (tons)", xlab="years")
 lines(attributes(total.emissions)[[1]], total.emissions)
+
+dev.off()

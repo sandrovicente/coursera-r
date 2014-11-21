@@ -9,4 +9,10 @@ names(total.emissions)<- c("type","year","total.emission")
 
 library(ggplot2)
 
-qplot(year, total.emission, data=total.emissions, facets= . ~ type, main="Total PM2.5 Emissions in Baltmore per source and year") + geom_line()
+pl <- qplot(year, total.emission, data=total.emissions, facets= . ~ type, ylab="PM2.5 (tons)", main="Total Emissions in Baltmore per source and year") + geom_line()
+
+png("plot3.png", width=640, height=480, units="px")
+
+print(pl)
+
+dev.off()

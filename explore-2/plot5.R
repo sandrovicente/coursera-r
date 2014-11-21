@@ -2,7 +2,7 @@
 
 source("loader.R")
 
-motorv.scc.index <-grep("Motor Vehicle", SCC$Short.Name)
+motorv.scc.index <-grep("Motor", SCC$Short.Name)
     
 baltimore.em <- NEI[NEI$fips == "24510",]
 
@@ -12,5 +12,9 @@ motorv.nei <- baltimore.em[motorv.nei.index,]
 
 motorv.emissions <- sapply(split(motorv.nei$Emissions, motorv.nei$year), sum)
 
-plot(attributes(motorv.emissions)[[1]], motorv.emissions, main="Total emissions of PM2.5 from Motor Vehicle-related sources in Baltimore", xlab="years")
+png("plot5.png", width=480, height=480, units="px")
+
+plot(attributes(motorv.emissions)[[1]], motorv.emissions, main="Total emissions from Motor Vehicle-related sources in Baltimore", xlab="years", ylab="PM2.5 (tons)")
 lines(attributes(motorv.emissions)[[1]], motorv.emissions)
+
+dev.off()

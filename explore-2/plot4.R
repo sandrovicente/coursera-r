@@ -9,5 +9,9 @@ coal.nei <- NEI[coal.nei.index,]
 
 coal.emissions <- sapply(split(coal.nei$Emissions, coal.nei$year), sum)
 
-plot(attributes(coal.emissions)[[1]], coal.emissions, main="Total emissions of PM2.5 from Coal-related sources", xlab="years")
+png("plot4.png", width=480, height=480, units="px")
+
+plot(attributes(coal.emissions)[[1]], coal.emissions, main="Total emissions from Coal-related sources", xlab="years", ylab="PM2.5 (tons)")
 lines(attributes(coal.emissions)[[1]], coal.emissions)
+
+dev.off()

@@ -2,15 +2,16 @@
 
 source("loader.R")
 
-motorv.scc.index <-grep("Motor", SCC$Short.Name)
+motorv.scc.index <-grep("Motor", SCC$Short.Name) # this selects Motor Vehicles and Motorcycles in the short description.
+                                                 # It is assumed that Motorcycles also are Motor Vehicles
     
-baltimore.em <- NEI[NEI$fips == "24510",]
+baltimore.em <- NEI[NEI$fips == "24510",] # only data for Baltimore
 
-motorv.nei.index <- baltimore.em$SCC %in% SCC[motorv.scc.index,1]
+motorv.nei.index <- baltimore.em$SCC %in% SCC[motorv.scc.index,1] # data referring to motor vehicles type
 
 motorv.nei <- baltimore.em[motorv.nei.index,]
 
-motorv.emissions <- sapply(split(motorv.nei$Emissions, motorv.nei$year), sum)
+motorv.emissions <- sapply(split(motorv.nei$Emissions, motorv.nei$year), sum) # sum grouping by year
 
 png("plot5.png", width=480, height=480, units="px")
 

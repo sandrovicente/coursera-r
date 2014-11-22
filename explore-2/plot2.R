@@ -2,9 +2,11 @@
 
 source("loader.R")
 
-baltimore.em <- NEI[NEI$fips == "24510",]
+baltimore.em <- NEI[NEI$fips == "24510",] # select rows corresponding to Baltimore
 
 total.emissions <- sapply(split(baltimore.em$Emissions, baltimore.em$year), sum)
+# Totals are stored in a vector. A vector of attributes is also generated for the corresponding years.
+# The attribute vector is accessed using 'attributes(total.emissions)[[1]]'
 
 png("plot2.png", width=480, height=480, units="px")
 

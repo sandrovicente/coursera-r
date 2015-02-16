@@ -65,23 +65,25 @@ fexp2 <- function(val, exp) {
     exp.num <- grepl("^[[:digit:]]+$", exp)
     exp.na <- is.na(exp)
     
-    val.1 <- ifelse(exp.num, (10^as.numeric(exp[exp.num])), val)
+    #exp.0 <- ifelse(exp.num, exp[exp.num], exp)
     exp.1 <- ifelse(exp.na, 0, exp)
     exp.2 <- ifelse(!exp.num & !exp.na, tolower(exp), exp.1)
 
     exp.sym <- exp.2 %in% c('h','k','m','b', '+')
     exp.3 <- ifelse(exp.sym, 
-                    ifelse(exp.2=='h', 100, 
-                           ifelse(exp.2=='k', 1e3, 
-                                  ifelse(exp.2=='m', 1e6,
-                                         ifelse(exp.2=='b', 1e9, 
-                                                ifelse(exp.2=='+', 10,
-                                                       1))))), 
+                    ifelse(exp.2=='h', 2, 
+                           ifelse(exp.2=='k', 3, 
+                                  ifelse(exp.2=='m', 6,
+                                         ifelse(exp.2=='b', 9, 
+                                                ifelse(exp.2=='+', 1,
+                                                       0))))), 
                     exp.2)
-    exp.3
+    10^as.numeric(exp.3)*val
+    #as.numeric(exp.3)
 }
 
-fexp2(c(2,10,31,42,0,-1, 1, 12,2), c(3,'m',1,'H',0, NA, 'k', '+', 'b'))
+fexp2(c(2.0,10.0,31,42,0,-1, 1, 12,2), c(3,'m',1,'H',0, NA, 'k', '+', 'b'))
+fexp2(c(10.0,500.0,1.0),c('M','K','M'))
 
 for (i in 1:nrow(dataset)){
     dataset[i, "PROPDMG.VAL"] <- dataset[i, "PROPDMG"]

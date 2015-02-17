@@ -30,46 +30,14 @@ fat.evtype[which.max(fat.evtype)]
 # 0..8 = number of zeros in the exponent ,     EDIT: <--- WRONG, it is multiplier of 10 
 # i.e. 0 = 1, 1 = 10, 2 = 100, 3 = 1000, 4 = 10000, ... , 7 = 1e7, 8 = 1e8 
 
-fexp <- function(val, exp) {
-    exp <- tolower(exp)    
-    if (is.na(exp)) {
-        return(val)    
-    } 
-    exp.num <- grep("^[[:digit:]]+$", exp)
-    if (length(exp.num) > 0) {
-        return(val*(10^as.numeric(exp)))
-    }
-    
-    switch(exp, k={val*1e3}, h={val*1e2}, m={val*1e6}, b={val*1e9}, '+'={val*10}, '-'={val}, {val})
-}
-
-fexp(NA, NA)
-fexp(9, NA)
-fexp(10,"+")
-fexp(12, "h")
-fexp(12, 3)
-
-fexp2 <- function(val, exp) {
-    ret <- val
-    ifelse(is.na(exp), 
-           ret<-val, {
-               exp.num <- grep("^[[:digit:]]+$", exp)
-               ifelse(length(exp.num)>1, 
-                      val*(10^as.numeric(exp)),
-                      val)
-           } )
-}
-
-
-fexp2 <- function(val, exp) {
+fexp <- function(exp) {
     exp.num <- grepl("^[[:digit:]]+$", exp)
     exp.na <- is.na(exp)
     
-    #exp.0 <- ifelse(exp.num, exp[exp.num], exp)
     exp.1 <- ifelse(exp.na, 0, exp)
     exp.2 <- ifelse(!exp.num & !exp.na, tolower(exp), exp.1)
-
-    exp.sym <- exp.2 %in% c('h','k','m','b', '+')
+    
+    exp.sym <- !exp.num & !exp.na
     exp.3 <- ifelse(exp.sym, 
                     ifelse(exp.2=='h', 2, 
                            ifelse(exp.2=='k', 3, 
@@ -78,8 +46,15 @@ fexp2 <- function(val, exp) {
                                                 ifelse(exp.2=='+', 1,
                                                        0))))), 
                     exp.2)
-    10^as.numeric(exp.3)*val
-    #as.numeric(exp.3)
+    as.numeric(exp.3)
+}
+
+
+fexp(c(3,'m',1,'H',0, NA, 'k', '+', 'b', '?'))
+fexp(c('M','K','M'))
+
+fexp2 <- function(val, exp) {
+    val * (10^fexp(exp))
 }
 
 fexp2(c(2.0,10.0,31,42,0,-1, 1, 12,2), c(3,'m',1,'H',0, NA, 'k', '+', 'b'))

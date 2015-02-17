@@ -44,3 +44,7 @@ fexp <- function(val, exp) {
 vectorized: check
 http://stackoverflow.com/questions/5626296/efficient-apply-or-mapply-for-multiple-matrix-arguments-by-row
 
+http://seananderson.ca/2014/09/13/dplyr-intro.html
+install.packages("dplyr")
+tail(dataset) %>% filter(PROPDMGEXP == "B")
+

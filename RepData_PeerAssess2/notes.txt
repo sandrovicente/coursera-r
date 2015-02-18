@@ -42,9 +42,34 @@ fexp <- function(val, exp) {
 
 
 vectorized: check
-http://stackoverflow.com/questions/5626296/efficient-apply-or-mapply-for-multiple-matrix-arguments-by-row
+http://stackoverflow.com/questions/562
+
+6296/efficient-apply-or-mapply-for-multiple-matrix-arguments-by-row
 
 http://seananderson.ca/2014/09/13/dplyr-intro.html
 install.packages("dplyr")
 tail(dataset) %>% filter(PROPDMGEXP == "B")
 
+----
+
+ [1] "STATE__"    "BGN_DATE"   "BGN_TIME"   "TIME_ZONE"  "COUNTY"     "COUNTYNAME" "STATE"      "EVTYPE"     "BGN_RANGE"  "BGN_AZI"    "BGN_LOCATI" "END_DATE"   "END_TIME"  
+[14] "COUNTY_END" "COUNTYENDN" "END_RANGE"  "END_AZI"    "END_LOCATI" "LENGTH"     "WIDTH"      "F"          "MAG"        "FATALITIES" "INJURIES"   "PROPDMG"    "PROPDMGEXP"
+[27] "CROPDMG"    "CROPDMGEXP" "WFO"        "STATEOFFIC" "ZONENAMES"  "LATITUDE"   "LONGITUDE"  "LATITUDE_E" "LONGITUDE_" "REMARKS"    "REFNUM"    
+
+
+
+1.Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+
+library(dplyr)
+
+dataset %>% arrange(desc(FATALITIES, INJURIES)) %>%  head(10) 
+
+
+2.Across the United States, which types of events have the greatest economic consequences?
+
+
+
+
+--
+
+    

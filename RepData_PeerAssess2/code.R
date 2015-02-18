@@ -3,7 +3,7 @@
 if (exists("dataset")) {
     message("Data already exists. Don't load it up again")
 } else {
-    dataset <- read.csv(bzfile("repdata_data_StormData.csv.bz2"), nrows=900000, na.strings="")    
+    dataset <- read.csv(bzfile("repdata_data_StormData.csv.bz2"), nrows=1000000, na.strings="")    
 }
 
 
@@ -50,16 +50,45 @@ fexp <- function(exp) {
 }
 
 
-fexp(c(3,'m',1,'H',0, NA, 'k', '+', 'b', '?'))
-fexp(c('M','K','M'))
+#fexp(c(3,'m',1,'H',0, NA, 'k', '+', 'b', '?'))
+#fexp(c('M','K','M'))
 
-fexp2 <- function(val, exp) {
+fvalexp <- function(val, exp) {
     val * (10^fexp(exp))
 }
 
-fexp2(c(2.0,10.0,31,42,0,-1, 1, 12,2), c(3,'m',1,'H',0, NA, 'k', '+', 'b'))
-fexp2(c(10.0,500.0,1.0),c('M','K','M'))
+#fvalexp(c(2.0,10.0,31,42,0,-1, 1, 12,2), c(3,'m',1,'H',0, NA, 'k', '+', 'b'))
+#fvalexp(c(10.0,500.0,1.0),c('M','K','M'))
 
-for (i in 1:nrow(dataset)){
-    dataset[i, "PROPDMG.VAL"] <- dataset[i, "PROPDMG"]
+library(dplyr)
+
+dataset$PROPDMG.V <-with(dataset, fvalexp(PROPDMG, PROPDMGEXP))
+dataset$CROPDMG.V <- with(dataset, fvalexp(CROPDMG, CROPDMGEXP))
+dataset$TOTALDMG.V <- with(dataset, CROPDMG.V + PROPDMG.V)
+
+dataset$BGN_DATE.V <- with(dataset, as.Date(BGN_DATE, "%m/%d/%Y"))
+dataset$BGN_DECADE <- with(dataset, paste(substr(format(dataset$BGN_DATE.V, "%Y"),1,3), "0", sep=""))
+
+decade.split <- split(dataset, dataset$BGN_DECADE)
+decades <- unique(dataset$BGN_DECADE)
+
+# health effects
+
+for (d in decades) {
+    print(d)
+    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V)
+    print(head(x,20))
 }
+
+dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(20) 
+
+# damages
+
+for (d in decades) {
+    print(d)
+    x<-decade.split[[d]] %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V)
+    print(head(x,20))
+}
+
+dataset  %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+

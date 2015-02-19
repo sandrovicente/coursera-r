@@ -1,0 +1,193 @@
+---
+title: "Reproducible Research Report"
+author: "Sandro Vicente"
+date: "Thursday, February 19, 2015"
+output: html_document
+---
+## Synopisis
+
+This is the synopsis of the project.
+
+## Data Processing
+
+There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data.
+
+The data used in this report was obtained from the U.S. National Oceanic and Atmospheric Administration (NOAA) and is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2). The documentation regarding this data is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf).
+
+Once downloaded, the data should placed in a folder together with the script which generates this report. The data, in CSV format, will be extracted directly from the compressed file (bz2) if it hasn't been performed yet.
+
+```{r, cache=TRUE}
+if (exists("dataset")) {
+    message("Data already exists. Don't load it up again")
+} else {
+    dataset <- read.csv(bzfile("repdata_data_StormData.csv.bz2"), nrows=1000000, na.strings="")    
+}
+```
+
+The number of rows obtained is 
+```{r}
+nrow(dataset)
+```
+
+The raw data in the variable *dataset* is further processed to extract:
+
+* Valid date, obtained from textual data in US format;
+* Decade, use for analysis over long periods of time;
+* Numeric value of property and crop damages, from abreviated notation used in the file;
+
+#### Valid date and Decade
+
+```{r, cache=TRUE}
+dataset$BGN_DATE.V <- with(dataset, as.Date(BGN_DATE, "%m/%d/%Y"))
+dataset$BGN_DECADE <- with(dataset, paste(substr(format(dataset$BGN_DATE.V, "%Y"),1,3), "0", sep=""))
+```
+
+#### Values of damages
+
+Acording with the [documentation presented](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), damages represented two variables, one for the value and another for the order of magnetude of the value: 'K' for thousands, 'M' for millions, 'B' for billions.
+
+However the number representations for magnetude is far more varied:
+
+```{r}
+unique(dataset$PROPDMGEXP)
+```
+Comparing instances of these representations against the notes, we concluded that:
+
+* 'H', 'h': hundreds;
+* 'K', 'k': thousands;
+* 'M', 'm': millions;
+* 'B', 'b': billions;
+* '+': x 10;
+* 1 to 8: order of magnetude, *i.e.* power of 10
+* '-', '?': unsure, so no order applied 
+* NA: no order applied
+
+Therefore the functions have been defined to convert the order of magnetude into values:
+
+```{r}
+# Convert order of magnetude into power of 10
+
+fexp <- function(exp) {
+    exp <- as.character(exp)
+    exp.num <- grepl("^[[:digit:]]+$", exp)
+    exp.na <- is.na(exp)
+    
+    exp.1 <- ifelse(exp.na, 0, exp)
+    exp.2 <- ifelse(!exp.num & !exp.na, tolower(exp), exp.1)
+    
+    exp.sym <- !exp.num & !exp.na
+    exp.3 <- ifelse(exp.sym, 
+                    ifelse(exp.2=='h', 2, 
+                           ifelse(exp.2=='k', 3, 
+                                  ifelse(exp.2=='m', 6,
+                                         ifelse(exp.2=='b', 9, 
+                                                ifelse(exp.2=='+', 1,
+                                                       0))))), 
+                    exp.2)
+    as.numeric(exp.3)
+}
+
+# Apply order the magnetude into value
+
+fvalexp <- function(val, exp) {
+    val * (10^fexp(exp))
+}
+```
+
+Using these functions, we were able to extract the numeric value of damages using:
+
+```{r, damagescalc, cache=TRUE}
+
+dataset$PROPDMG.V <-with(dataset, fvalexp(PROPDMG, PROPDMGEXP))
+dataset$CROPDMG.V <- with(dataset, fvalexp(CROPDMG, CROPDMGEXP))
+dataset$TOTALDMG.V <- with(dataset, CROPDMG.V + PROPDMG.V)
+
+```
+
+In addition, a dataset of recent events (from 1995 onwards) and groupings per decades are created
+
+```{r, splitdecade, cache=TRUE}
+require(dplyr)
+
+dataset.recent <- dataset %>% filter(BGN_DATE.V > as.Date("01/01/1995", "%m/%d/%Y"))
+
+decade.split <- split(dataset, dataset$BGN_DECADE)
+decades <- unique(dataset$BGN_DECADE)
+
+```
+
+## Analysis
+
+Looking into the events along the decades, we can identify the top events that caused highest number of fatalities.
+
+```{r, fatalities}
+require(dplyr)
+
+# health effects
+top <- 5
+
+# fatalities
+for (d in decades) {
+    print(d)
+    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top)
+    print(x)
+}
+```
+
+The top 20 most lethal events of all times
+
+```{r}
+top <- 20
+dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
+```
+
+And the top most lethal in recent times
+
+```{r}
+dataset.recent %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
+```
+
+We can observe that **heat** is responsible for the largest amount of deaths in recent times, followed by **tornadoes**.
+
+In terms of damages, we can perform similar analysis.
+
+```{r, damages}
+require(dplyr)
+
+# health effects
+top <- 5
+
+# damages
+for (d in decades) {
+    print(d)
+    x<-decade.split[[d]]  %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top)
+    print(x)
+}
+```
+
+
+The top highest damage events of all time
+
+```{r}
+top <- 20
+dataset %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
+```
+
+And the top in recent times
+
+```{r}
+dataset.recent %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
+```
+
+At the top of the list, is the flood of 2006, which caused damage of the order of US$ 115 Billion.
+
+```{r}
+ dataset[dataset$REFNUM==605943,]
+```
+
+Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. 
+
+## Results
+
+There should be a section titled Results in which your results are presented.
+

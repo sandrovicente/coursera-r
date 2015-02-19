@@ -31,6 +31,7 @@ fat.evtype[which.max(fat.evtype)]
 # i.e. 0 = 1, 1 = 10, 2 = 100, 3 = 1000, 4 = 10000, ... , 7 = 1e7, 8 = 1e8 
 
 fexp <- function(exp) {
+    exp <- as.character(exp)
     exp.num <- grepl("^[[:digit:]]+$", exp)
     exp.na <- is.na(exp)
     
@@ -76,8 +77,8 @@ decades <- unique(dataset$BGN_DECADE)
 
 for (d in decades) {
     print(d)
-    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V)
-    print(head(x,20))
+    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+    print(x)
 }
 
 dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(20) 
@@ -86,9 +87,9 @@ dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FAT
 
 for (d in decades) {
     print(d)
-    x<-decade.split[[d]] %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V)
-    print(head(x,20))
+    x<-decade.split[[d]] %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+    print(x)
 }
 
 dataset  %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
-
+ 

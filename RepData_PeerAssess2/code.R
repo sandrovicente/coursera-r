@@ -74,22 +74,32 @@ decade.split <- split(dataset, dataset$BGN_DECADE)
 decades <- unique(dataset$BGN_DECADE)
 
 # health effects
+top <- 20
 
+# fatalities
 for (d in decades) {
     print(d)
-    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(top)
     print(x)
 }
 
-dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(20) 
+dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(top) 
+
+# injuries
+for (d in decades) {
+    print(d)
+    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES + INJURIES)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(top)
+    print(x)
+}
+
 
 # damages
 
 for (d in decades) {
     print(d)
-    x<-decade.split[[d]] %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+    x<-decade.split[[d]] %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(top)
     print(x)
 }
 
-dataset  %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(20)
+dataset  %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(top)
  

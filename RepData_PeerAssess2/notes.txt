@@ -70,7 +70,12 @@ dataset %>% arrange(desc(FATALITIES, INJURIES)) %>%  head(10)
 
 2.Across the United States, which types of events have the greatest economic consequences?
 
+--
 
+simplify levels:
+
+> y$EVTYPE <- factor(y$EVTYPE)
+> levels(y$EVTYPE)
 
 
 --
@@ -78,4 +83,15 @@ dataset %>% arrange(desc(FATALITIES, INJURIES)) %>%  head(10)
     
 Niceprint:
 http://stackoverflow.com/questions/27648782/numbers-formatted-in-r-to-look-better-thousands-separators-etc-are-no-longer
+
+---
+classes of events
+
+FLOOD
+STORM
+HURRICANE
+TORNADO
+HAIL
+HEAT
+SNOW
 

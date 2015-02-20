@@ -85,12 +85,6 @@ for (d in decades) {
 
 dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(top) 
 
-# injuries
-for (d in decades) {
-    print(d)
-    x<-decade.split[[d]]  %>% arrange(desc(FATALITIES + INJURIES)) %>% %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>%  head(top)
-    print(x)
-}
 
 
 # damages
@@ -103,3 +97,34 @@ for (d in decades) {
 
 dataset  %>% arrange(desc(TOTALDMG.V)) %>% select(BGN_DATE, EVTYPE, FATALITIES, INJURIES, PROPDMG.V, CROPDMG.V, TOTALDMG.V) %>% head(top)
  
+## CLASS of event
+# FLOOD
+# STORM
+# HURRICANE
+# TORNADO
+# HAIL
+# HEAT
+# SNOW
+
+fevent <- function(event) {
+    event <- as.character(event)
+    ret<-ifelse(grepl("FLOOD|TSUNAMI", event, ignore.case=T), "FLOOD/TSUNAMI",
+           ifelse(grepl("STORM|HIGH WIND", event, ignore.case=T), "STORM",
+                  ifelse(grepl("HURRICANE", event, ignore.case=T), "HURRICANE",
+                         ifelse(grepl("TORNADO", event, ignore.case=T), "TORNADO", 
+                                ifelse(grepl("HAIL", event, ignore.case=T), "HAIL",
+                                        ifelse(grepl("HEAT", event, ignore.case=T), "HEAT",
+                                               ifelse(grepl("WINTER|SNOW|FREEZE|FROST|BLIZZARD", event, ignore.case=T), "SNOW", "OTHER")))))))
+    ret
+}
+
+dataset$EVCLASS <- fevent(dataset.recent$EVTYPE)
+table(dataset$EVCLASS)
+
+top100.dmg <- dataset  %>% arrange(desc(TOTALDMG.V)) %>%  head(100)
+top100.fat <- dataset  %>% arrange(desc(FATALITIES)) %>%  head(100)
+
+pie(table(top100.dmg$EVCLASS))
+pie(table(top100.fat$EVCLASS))
+
+

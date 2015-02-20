@@ -44,7 +44,7 @@ dataset$BGN_DECADE <- with(dataset, paste(substr(format(dataset$BGN_DATE.V, "%Y"
 
 #### Values of damages
 
-Acording with the [documentation presented](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf), damages represented two variables, one for the value and another for the order of magnetude of the value: 'K' for thousands, 'M' for millions, 'B' for billions.
+Acording with the [documentation presented](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) by NOAA, damages represented two variables, one for the value and another for the order of magnetude of the value: 'K' for thousands, 'M' for millions, 'B' for billions.
 
 However the number representations for magnetude is far more varied:
 
@@ -104,12 +104,12 @@ dataset$TOTALDMG.V <- with(dataset, CROPDMG.V + PROPDMG.V)
 
 ```
 
-In addition, a dataset of recent events (from 1995 onwards) and groupings per decades are created
+In addition, a dataset of recent events (from 2000 onwards) and groupings per decades was created
 
 ```{r, splitdecade, cache=TRUE}
 require(dplyr)
 
-dataset.recent <- dataset %>% filter(BGN_DATE.V > as.Date("01/01/1995", "%m/%d/%Y"))
+dataset.recent <- dataset %>% filter(BGN_DATE.V > as.Date("01/01/2000", "%m/%d/%Y"))
 
 decade.split <- split(dataset, dataset$BGN_DECADE)
 decades <- unique(dataset$BGN_DECADE)
@@ -134,7 +134,7 @@ for (d in decades) {
 }
 ```
 
-The top 20 most lethal events of all times
+The top 20 most lethal events of all time
 
 ```{r}
 top <- 20

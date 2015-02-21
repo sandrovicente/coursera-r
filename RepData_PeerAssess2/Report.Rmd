@@ -1,23 +1,24 @@
 ---
-title: "Reproducible Research Report"
+title: "Report on classes of natural events of highest fatalities and economic impact in the United States"
 author: "Sandro Vicente"
 date: "Thursday, February 19, 2015"
 output: html_document
 ---
 ## Synopisis
 
-This report comprehend the analysis of data concerning severe weather and storms in the period encompassing 70 decades, from 1950 to 2011. 
+This report comprehend the analysis of data concerning severe weather and storms along 7 decades (from 1950 to 2011). 
 The analysis focused on two main aspects: 
 
 1. events more harmful to human health, and;
-2. events with highest economic impact, _i.e._ with highest value of damages. 
+2. events with highest economic impact. 
 
-The analysis presents an overview events concerning these aspects along all the decades covered, with a emphasis on more recent events, _i.e._ as from year 2000.
+The analysis covers the top events across all the decades, with emphasis on events as from year 2000. 
 
+From the data, we observe that most deadly events, currently, are tornadoes and heat waves. In terms of economic consequences, the most impacting events are floods and storms.  
 
 ## Data Processing
 
-The data used in this report was obtained from the U.S. National Oceanic and Atmospheric Administration (NOAA) and is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2). The documentation regarding this data is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf).
+The data used in this report was obtained from the U.S. National Oceanic and Atmospheric Administration (NOAA) and is available from this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2). The documentation regarding this data is available at this [location](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf).
 
 ```{r, cache=TRUE}
 if (exists("dataset")) {
@@ -34,11 +35,11 @@ nrow(dataset)
 
 The raw data in the variable *dataset* is further processed to extract:
 
-* Valid date, obtained from textual data in US format;
-* Decade, use for analysis over long periods of time;
-* Numeric value of property and crop damages, from abreviated notation used in the file;
+* Valid dates, obtained from textual data in US format;
+* Decades, use for analysis over long periods of time;
+* Numeric total value of property and crop damages, from abreviated notation used in the raw dataset;
 
-#### Valid date and Decade
+#### Valid dates and Decades
 
 ```{r, cache=TRUE}
 dataset$BGN_DATE.V <- with(dataset, as.Date(BGN_DATE, "%m/%d/%Y"))
@@ -49,7 +50,7 @@ dataset$BGN_DECADE <- with(dataset, paste(substr(format(dataset$BGN_DATE.V, "%Y"
 
 Acording with the [documentation presented](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) by NOAA, damages represented two variables, one for the value and another for the order of magnetude of the value: 'K' for thousands, 'M' for millions, 'B' for billions.
 
-However the number representations for magnetude is far more varied:
+However the actual number of representations for magnetude is far more varied:
 
 ```{r}
 unique(dataset$PROPDMGEXP)
@@ -61,7 +62,7 @@ Comparing instances of these representations against the notes, we concluded tha
 * 'M', 'm': millions;
 * 'B', 'b': billions;
 * '+': x 10;
-* 1 to 8: order of magnetude, *i.e.* power of 10
+* 1 to 8: order of magnetude, *i.e.* the power of 10 to be applied
 * '-', '?': unsure, so no order applied 
 * NA: no order applied
 
@@ -107,7 +108,7 @@ dataset$TOTALDMG.V <- with(dataset, CROPDMG.V + PROPDMG.V)
 
 ```
 
-The values of damages is important in the evaluation of the economic impact of the reported events. 
+The values of damages are important in the evaluation of the economic impact of the reported events. 
 
 In addition, a dataset of recent events (from 2000 onwards) and groupings per decades was created:
 
@@ -143,7 +144,7 @@ for (d in decades) {
 }
 ```
 
-The top 20 most lethal events of all time is depicted below:
+The top 20 most lethal events of all time are listed below:
 
 ```{r}
 top <- 20
@@ -158,7 +159,7 @@ dataset.recent %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BG
 
 We can observe that **heat** is responsible for the largest amount of deaths in recent times, followed by **tornadoes**.
 
-In terms of economic impact, we can perform similar analysis using the totals of damages calculated during the data extraction (from the values and magnetudes of reported damages for properties and crops)s.
+In terms of economic impact, we can perform similar analysis using the totals of damages calculated during the data extraction (from the values and magnetudes of reported damages for properties and crops).
 
 ```{r, damages}
 require(dplyr)
@@ -188,6 +189,8 @@ And the top 20 in recent times below:
 dataset.recent %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
 ```
 
+We can observe that **storms** and **hurricanes** currently figure among the events with highest economic impact.
+
 Since the field EVTYPE is not normalized, containing a high number of items with redundant terms, a new class was used to facilitate the analysis.
 
 ```{r}
@@ -207,7 +210,7 @@ length(unique(dataset.recent$EVTYPE))
 
 fevent <- function(event) {
     event <- as.character(event)
-    ret<-ifelse(grepl("FLOOD", event, ignore.case=T), "FLOOD/TSUNAMI",
+    ret<-ifelse(grepl("FLOOD", event, ignore.case=T), "FLOOD",
            ifelse(grepl("STORM|HIGH WIND|HAIL", event, ignore.case=T), "STORM",
                   ifelse(grepl("HURRICANE", event, ignore.case=T), "HURRICANE",
                          ifelse(grepl("TORNADO", event, ignore.case=T), "TORNADO", 
@@ -222,10 +225,9 @@ This new class is then added to the most recent dataset
 
 ```{r, cache=TRUE}
 dataset.recent$EVCLASS <- fevent(dataset.recent$EVTYPE)
-
 ```
 
-With this class, we are able to check the distribution of events among the top 100 highest numer of fatalaties and of economic impact.
+With this class, we are able to check the distribution of events among the top 100 highest number of fatalities and of economic impact.
 ```{r, cache=TRUE}
 top100.dmg <- dataset.recent  %>% arrange(desc(TOTALDMG.V)) %>%  head(100)
 top100.fat <- dataset.recent  %>% arrange(desc(FATALITIES)) %>%  head(100)
@@ -237,26 +239,35 @@ This allow us to check the proportion of such events in the charts below:
 par(mfrow = c(1,2), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
 pie(table(top100.fat$EVCLASS), main="Fatalities")
 pie(table(top100.dmg$EVCLASS), main="Economic Impact")
-mtext("Proportion of events with top 100 highest", outer=T)
+mtext("Fig.1: Proportion of events with top 100 highest", outer=T)
 ```
 
-Furthermore, the proportion of the totals of fatalities and of damages resulting from all the recently recorded events (_i.e._ from 2000 onwards) is shown below:  
+Furthermore, the proportion of the totals of fatalities and of damages resulting from all the recently recorded events (_i.e._ from the year 2000 onwards) is shown below:  
 
 ```{r}
 par(mfrow = c(1,2), oma = c(0, 0, 2, 0))
 pie(tapply(dataset.recent$FATALITIES, dataset.recent$EVCLASS, sum), main="Fatalities")
 pie(tapply(dataset.recent$TOTALDMG.V, dataset.recent$EVCLASS, sum), main="Economic Impact")
-mtext("Proportion of the totals of outcomes from all recent events recorded as from 2000", outer=T)
+mtext("Fig.2: Proportion of the totals of outcomes from all recent events recorded as from 2000", outer=T)
 ```
 
 ## Results
 
-Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. 
+In terms of harm to population health, considering primarily the fatalities caused, excessive heat and tornadoes are the most harmful weather events.
 
-At the top of the list of events with highest economic impact, is the flood of 2006, which caused damage of the order of US$ 115 Billion.
+It is interesting to notice that excessive heat became a top element of harm recently, during the mid-nineties. Before that, the events with highest potential for harm were the tornadoes alone.
+
+A heat wave in 1995 figures as the most deadly event of all time. 
+
+In terms of economic impact, again tornados were the single top most damaging events up to 1990s. As from the 1993, the top events causing economic impact have been of mixed types, including mainly hurricanes, floods and storms in addition to tornadoes.
+
+At the top of the list of events with highest economic impact is the flood of 2006, which caused damage of the order of US$ 115 Billion.
 
 ```{r}
  dataset[dataset$REFNUM==605943,c("BGN_DATE", "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP", "REMARKS")]
 ```
 
 Remarkably, no fatalities or injuries were directly associated with this event.
+
+Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. Heat waves are a clear example. Hurricanes, on the other hand, cause more economic damages than fatalities. That is visible in the distributions of outcomes in the pie-charts in the figure 2.
+

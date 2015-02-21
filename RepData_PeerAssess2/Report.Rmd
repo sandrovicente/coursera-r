@@ -6,15 +6,18 @@ output: html_document
 ---
 ## Synopisis
 
-This is the synopsis of the project.
+This report comprehend the analysis of data concerning severe weather and storms in the period encompassing 70 decades, from 1950 to 2011. 
+The analysis focused on two main aspects: 
+
+1. events more harmful to human health, and;
+2. events with highest economic impact, _i.e._ with highest value of damages. 
+
+The analysis presents an overview events concerning these aspects along all the decades covered, with a emphasis on more recent events, _i.e._ as from year 2000.
+
 
 ## Data Processing
 
-There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data.
-
 The data used in this report was obtained from the U.S. National Oceanic and Atmospheric Administration (NOAA) and is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2). The documentation regarding this data is available in this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf).
-
-Once downloaded, the data should placed in a folder together with the script which generates this report. The data, in CSV format, will be extracted directly from the compressed file (bz2) if it hasn't been performed yet.
 
 ```{r, cache=TRUE}
 if (exists("dataset")) {
@@ -94,7 +97,7 @@ fvalexp <- function(val, exp) {
 }
 ```
 
-Using these functions, we were able to extract the numeric value of damages using:
+Using these functions, we were able to extract the numeric total value of damages:
 
 ```{r, damagescalc, cache=TRUE}
 
@@ -104,7 +107,9 @@ dataset$TOTALDMG.V <- with(dataset, CROPDMG.V + PROPDMG.V)
 
 ```
 
-In addition, a dataset of recent events (from 2000 onwards) and groupings per decades was created
+The values of damages is important in the evaluation of the economic impact of the reported events. 
+
+In addition, a dataset of recent events (from 2000 onwards) and groupings per decades was created:
 
 ```{r, splitdecade, cache=TRUE}
 require(dplyr)
@@ -116,9 +121,13 @@ decades <- unique(dataset$BGN_DECADE)
 
 ```
 
+We this data, we proceeded with the analysis in the following section.
+
 ## Analysis
 
-Looking into the events along the decades, we can identify the top events that caused highest number of fatalities.
+For this report, we assumed that the primary measurement of harm of an event is the number of fatalities it causes. 
+
+Looking into the events along the decades, we can identify the top 5 events that caused highest number of fatalities.
 
 ```{r, fatalities}
 require(dplyr)
@@ -134,14 +143,14 @@ for (d in decades) {
 }
 ```
 
-The top 20 most lethal events of all time
+The top 20 most lethal events of all time is depicted below:
 
 ```{r}
 top <- 20
 dataset %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
 ```
 
-And the top most lethal in recent times
+And the 20 top most lethal in recent times:
 
 ```{r}
 dataset.recent %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
@@ -149,7 +158,7 @@ dataset.recent %>% arrange(desc(FATALITIES, INJURIES)) %>% mutate(DATE=format(BG
 
 We can observe that **heat** is responsible for the largest amount of deaths in recent times, followed by **tornadoes**.
 
-In terms of damages, we can perform similar analysis.
+In terms of economic impact, we can perform similar analysis using the totals of damages calculated during the data extraction (from the values and magnetudes of reported damages for properties and crops)s.
 
 ```{r, damages}
 require(dplyr)
@@ -166,28 +175,88 @@ for (d in decades) {
 ```
 
 
-The top highest damage events of all time
+The top 20 events with highest economic impact of all time are shown below:
 
 ```{r}
 top <- 20
 dataset %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
 ```
 
-And the top in recent times
+And the top 20 in recent times below:
 
 ```{r}
 dataset.recent %>% arrange(desc(TOTALDMG.V)) %>% mutate(DATE=format(BGN_DATE.V, "%Y-%m-%d")) %>% select(DATE, EVTYPE, FATALITIES, INJURIES, TOTALDMG.V) %>%  head(top) 
 ```
 
-At the top of the list, is the flood of 2006, which caused damage of the order of US$ 115 Billion.
+Since the field EVTYPE is not normalized, containing a high number of items with redundant terms, a new class was used to facilitate the analysis.
 
 ```{r}
- dataset[dataset$REFNUM==605943,]
+
+length(unique(dataset.recent$EVTYPE))
+
+# Break into classes:
+#
+# FLOOD: Which includes FLOODs in general and TSUNAMIs
+# STORM: Storms involvig precipitation, HIGH WINDs and HAIL
+# HURRICANE
+# TORNADO
+# DROUGHT
+# HEAT 
+# FIRE
+# OTHER: all other event types
+
+fevent <- function(event) {
+    event <- as.character(event)
+    ret<-ifelse(grepl("FLOOD", event, ignore.case=T), "FLOOD/TSUNAMI",
+           ifelse(grepl("STORM|HIGH WIND|HAIL", event, ignore.case=T), "STORM",
+                  ifelse(grepl("HURRICANE", event, ignore.case=T), "HURRICANE",
+                         ifelse(grepl("TORNADO", event, ignore.case=T), "TORNADO", 
+                                ifelse(grepl("FIRE", event, ignore.case=T), "FIRE",
+                                        ifelse(grepl("HEAT", event, ignore.case=T), "HEAT",
+                                               ifelse(grepl("DROUGHT", event, ignore.case=T), "DROUGHT", "OTHER")))))))
+    ret
+}
 ```
 
-Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. 
+This new class is then added to the most recent dataset
+
+```{r, cache=TRUE}
+dataset.recent$EVCLASS <- fevent(dataset.recent$EVTYPE)
+
+```
+
+With this class, we are able to check the distribution of events among the top 100 highest numer of fatalaties and of economic impact.
+```{r, cache=TRUE}
+top100.dmg <- dataset.recent  %>% arrange(desc(TOTALDMG.V)) %>%  head(100)
+top100.fat <- dataset.recent  %>% arrange(desc(FATALITIES)) %>%  head(100)
+```
+
+This allow us to check the proportion of such events in the charts below:
+
+```{r}
+par(mfrow = c(1,2), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
+pie(table(top100.fat$EVCLASS), main="Fatalities")
+pie(table(top100.dmg$EVCLASS), main="Economic Impact")
+mtext("Proportion of events with top 100 highest", outer=T)
+```
+
+Furthermore, the proportion of the totals of fatalities and of damages resulting from all the recently recorded events (_i.e._ from 2000 onwards) is shown below:  
+
+```{r}
+par(mfrow = c(1,2), oma = c(0, 0, 2, 0))
+pie(tapply(dataset.recent$FATALITIES, dataset.recent$EVCLASS, sum), main="Fatalities")
+pie(tapply(dataset.recent$TOTALDMG.V, dataset.recent$EVCLASS, sum), main="Economic Impact")
+mtext("Proportion of the totals of outcomes from all recent events recorded as from 2000", outer=T)
+```
 
 ## Results
 
-There should be a section titled Results in which your results are presented.
+Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. 
 
+At the top of the list of events with highest economic impact, is the flood of 2006, which caused damage of the order of US$ 115 Billion.
+
+```{r}
+ dataset[dataset$REFNUM==605943,c("BGN_DATE", "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP", "REMARKS")]
+```
+
+Remarkably, no fatalities or injuries were directly associated with this event.

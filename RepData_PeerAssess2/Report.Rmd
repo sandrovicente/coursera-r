@@ -236,19 +236,19 @@ top100.fat <- dataset.recent  %>% arrange(desc(FATALITIES)) %>%  head(100)
 This allow us to check the proportion of such events in the charts below:
 
 ```{r}
-par(mfrow = c(1,2), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
-pie(table(top100.fat$EVCLASS), main="Fatalities")
-pie(table(top100.dmg$EVCLASS), main="Economic Impact")
-mtext("Fig.1: Proportion of events with top 100 highest", outer=T)
+par(mfrow = c(1,2), mar=c(8,4,3,1), oma = c(0, 0, 2, 0))
+barplot(table(top100.fat$EVCLASS), las=2, main="Fatalities")
+barplot(table(top100.dmg$EVCLASS), las=2, main="Economic Impact")
+mtext("Fig.1: Number of events with top 100 highest", outer=T)
 ```
 
 Furthermore, the proportion of the totals of fatalities and of damages resulting from all the recently recorded events (_i.e._ from the year 2000 onwards) is shown below:  
 
 ```{r}
-par(mfrow = c(1,2), oma = c(0, 0, 2, 0))
-pie(tapply(dataset.recent$FATALITIES, dataset.recent$EVCLASS, sum), main="Fatalities")
-pie(tapply(dataset.recent$TOTALDMG.V, dataset.recent$EVCLASS, sum), main="Economic Impact")
-mtext("Fig.2: Proportion of the totals of outcomes from all recent events recorded as from 2000", outer=T)
+par(mfrow = c(1,2), mar=c(1,4,3,4), oma = c(0, 0, 2, 0))
+pie(tapply(dataset.recent$FATALITIES, dataset.recent$EVCLASS, sum), las=2, main="Fatalities")
+pie(tapply(dataset.recent$TOTALDMG.V, dataset.recent$EVCLASS, sum), las=2, main="Economic Impact")
+mtext("Fig.2: Proportion of total amount of outcomes from all events recorded as from 2000", outer=T)
 ```
 
 ## Results
@@ -269,5 +269,5 @@ At the top of the list of events with highest economic impact is the flood of 20
 
 Remarkably, no fatalities or injuries were directly associated with this event.
 
-Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. Heat waves are a clear example. Hurricanes, on the other hand, cause more economic damages than fatalities. That is visible in the distributions of outcomes in the pie-charts in the figure 2.
+Looking into the other events, we can see the events with the greatest economic consequences (in terms of costs) are not necessarily the most lethal. Heat waves are a clear example. Hurricanes, on the other hand, cause more economic damages than fatalities. That is visible in the distributions of outcomes in the charts in the figure 2.
 

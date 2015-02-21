@@ -78,6 +78,10 @@ simplify levels:
 > levels(y$EVTYPE)
 
 
+dataset.recent$YEAR<-format(dataset.recent$BGN_DATE.V, "%Y")
+totals <- dataset.recent %>% select(YEAR, EVCLASS, FATALITIES, TOTALDMG.V) %>% arrange(YEAR) %>% group_by(EVCLASS,YEAR) %>% summarise(TOT.FATAL = sum(FATALITIES), TOT.DMG=sum(TOTALDMG.V))
+
+
 --
 
     

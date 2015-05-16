@@ -1,5 +1,5 @@
 ---
-title: "Statistical Inference - Analysis of Exponential Dsistribution"
+title: "Statistical Inference - Analysis of Exponential Distribution"
 author: "Sandro Vicente"
 date: "Saturday, May 16, 2015"
 output: html_document
@@ -109,3 +109,6 @@ ggplot(DF, aes(x=means)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..densit
 
 This confirms the *Central Limit Theorem*, which states that the distribution of averages of iid variables becomes that of a standard normal as the sample size increases. 
 In the case of this experiment, we used an sample of `r nosim` means of `r n` samples originated from an exponential distribution of lambda `r lambda`. The distribution of the means of 'n' values yielded results consistent with the ones of a normal distribution.
+
+## Inferential Data Analysis Part
+

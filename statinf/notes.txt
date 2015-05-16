@@ -1,0 +1,20 @@
+
+Investigate the exponential distribution in R and compare it with the Central Limit Theorem
+
+The exponential distribution:
+  - simulated with rexp(n, lambda)
+    - lambda <-- rate parameter
+    - mean <- 1/lambda
+    - sd <- 1/lambda
+
+* set lambda = 0.2 for all simulations
+
+investigate averages of 40 exponentials
+1000 simulations
+
+- illustrate properties o the distribution of the mean of 40 exponentials
+1/ show sample mean / compare with theoretical mean
+2/ show how variable the sample is (via variance) / compare with theoretical variance
+3/ show that the distribution is normal
+
+ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) + stat_function(fun = dnorm, size = 2)

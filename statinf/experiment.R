@@ -20,6 +20,8 @@ sd.means <- sd(means)
 
 library(ggplot2)
 
-M <- data.frame(x=means)
+DF <- data.frame(x=means)
+ggplot(DF, aes(x=x)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..density..)) + stat_function(fun=dnorm, args=list(mean=m.means, sd=sd.means)) 
 
-ggplot(M, aes(x=x)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..density..)) + stat_function(fun=dnorm, args=list(mean=m.means, sd=sd.means)) 
+DF.ALL <- data.frame(values=ALL)
+ggplot(DF.ALL, aes(x=values)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + xlim(0, 35)

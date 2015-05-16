@@ -17,4 +17,9 @@ investigate averages of 40 exponentials
 2/ show how variable the sample is (via variance) / compare with theoretical variance
 3/ show that the distribution is normal
 
-ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) + stat_function(fun = dnorm, size = 2)
+ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) + stat_function(fun = dnorm, size = 2) + facet_grid(. ~ size)
+
+ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) + stat_function(fun = dnorm, size = 1) + facet_grid(. ~ size)
+
+
+ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) + stat_function(fun = dnorm) + facet_grid(. ~ size)

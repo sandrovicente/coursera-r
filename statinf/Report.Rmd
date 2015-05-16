@@ -4,11 +4,15 @@ author: "Sandro Vicente"
 date: "Saturday, May 16, 2015"
 output: html_document
 ---
-### Overview
+## Overview
 
  In a few (2-3) sentences explain what is going to be reported on.
 
-### Simulations
+## Simulation Part
+
+In this part, we investigate the values from a exponential distribution, extracting means of 40 values of the distribution and observing how the observed values of the mean and standard errors adhere to the theretical values. We also investigate how distribution of means correspond to a normal distribution.
+
+### Generating Data
 
 Parameters used for the experiment
 
@@ -18,81 +22,90 @@ n <- 40
 lambda <- 0.2 
 ```
 
-Calculate theoretical mean and standard deviations
+The idea is to obtain `r nosim` means of `r n` values from the exponential distribution with lambda = `r lambda`. 
+Therefore we generate a total of `r nosim * n` values from the exponential distribution, which we call *raw data*.
+
+We can calculate the theoretical mean and standard deviations, which for exponential distributions, are based on lambda: 
 
 ```{r}
 m.dist <- 1/lambda
 sd.dist <- 1/lambda
 
-m.dist
-sd.dist
-
+m.dist # theoretical mean for the exponential distribution 
+sd.dist # theoretical standard error for the exponential distribution
 ```
 
-Generate data using the exponential distribution
+And generate the raw data using the exponential distribution. 
+We also can calculate the mean and standard error for the raw data.
 
 ```{r}
-ALL <- rexp(nosim*n, lambda) # all data
+ALL <- rexp(nosim*n, lambda) # all raw data
 
-MEAN <- matrix(ALL, nosim)   # split in blocks of 'n' samples
-means <- apply(MEAN, 1, mean) # calculate the mean of each block
+m.all <- mean(ALL)
+sd.all <- sd(ALL)
+
+m.all # mean for the raw values obtained
+sd.all # standard error for the raw values obtained
 ```
 
-Plot of the original sample
+We can see that the theoretical mean and standard deviations match the values for the raw data.
+
+The Figure 1 shows a plot of the density of values from the raw data, which follows a typical exponential distribution curve.
+The mean (marked in red) is the "centre of mass" of the curve.
 
 ```{r}
 library(ggplot2)
 
 DF.ALL <- data.frame(values=ALL)
-ggplot(DF.ALL, aes(x=values)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + xlim(0, 35) + xlab("All values") + ggtitle("Density of raw samples") + geom_vline(aes(xintercept=5), colour="red")
+ggplot(DF.ALL, aes(x=values)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + xlim(0, 35) + xlab("All values") + ggtitle("Figure 1 - Density of raw samples") + geom_vline(aes(xintercept=5), colour="red")
 ```
 
-However, when we plot the distribution of values for the means of groups of 'n' = `r n` values:
+Now we can calculate the mean of samples of `r n` values from the raw data. 
 
 ```{r}
-DF <- data.frame(means=means)
-
-ggplot(DF.ALL, aes(x=means)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + ggtitle("Density of means of 'n' values") + geom_vline(aes(xintercept=5), colour="red")
-
+MEAN <- matrix(ALL, nosim)   # split in blocks of 'n' samples
+means <- apply(MEAN, 1, mean) # calculate the mean of each block
 ```
 
-Now calculate the mean and sd from ALL values
 
+And calculate the mean and standard error for the means of 'n' samples
 ```{r}
 
-m.all <- mean(ALL)
-sd.all <- sd(ALL)
+m.means <- mean(means) 
+sd.means <- sd(means) 
 
-m.all
-sd.all
+sd.n <- sd.all/sqrt(n) 
 
+m.means  # mean of means of 'n' samples
+sd.means # sd calculated from the means of 'n' samples
+sd.n # sd based on original sd, corrected for mean of 'n' samples
 ```
+Above, for the standard errors, calculating it directly from the means or using the value from the raw standard error divided by square root of `r n` result in similar values.
 
-Calculate the mean and sd for the averages of 'n' samples
-    
-```{r}
-
-m.means <- mean(means)
-sd.means <- sd(means) # sd calculated from the means of 'n' samples
-
-sd.n <- sd.all/sqrt(n) # sd based on original sd, corrected for mean of 'n' samples
-
-m.means
-sd.means
-sd.n
-
-```
-
-The theoretical value for sd of a sample of size 'n'=`r n` is:
+These results are compatible with the theoretical value for standard error of a sample of size 'n'=`r n` :
 ```{r}
 sd.dist / sqrt(n) 
 ```
 
+When we plot the distribution of *means of samples* of 'n' = `r n`, we obtain a curve that resambles a Gaussian, shown in figure 2. 
+The red line shows the distribution's mean `r m.means`, which matches the area with highest density in the distribution. The blue line shows the theoretical mean `r m.dist`.
+
+```{r}
+DF <- data.frame(means=means)
+
+ggplot(DF.ALL, aes(x=means)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + ggtitle("Figure 2 - Density of means of 'n' samples") + geom_vline(aes(xintercept=m.means), colour="red") + geom_vline(aes(xintercept=m.dist), colour="blue")
+
+```
+
+
 ### Analysis of the results
 
-Now plot a the distribution of means and compare it agaist a normal distribution of same mean and sd
+We can compare the distribution of means of samples agaist a normal distribution with the same mean and standard error. This is shown in the figure 3.
 
 ```{r}
 
-ggplot(DF, aes(x=means)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..density..)) + stat_function(fun=dnorm, args=list(mean=m.means, sd=sd.means)) 
+ggplot(DF, aes(x=means)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..density..)) + stat_function(fun=dnorm, args=list(mean=m.means, sd=sd.means)) + ggtitle("Figure 3 - Means of 'n' samples against normal distribution ") 
 ```
+
+This confirms the *Central Limit Theorem*, which states that the distribution of averages of iid variables becomes that of a standard normal as the sample size increases. 
+In the case of this experiment, we used an sample of `r nosim` means of `r n` samples originated from an exponential distribution of lambda `r lambda`. The distribution of the means of 'n' values yielded results consistent with the ones of a normal distribution.

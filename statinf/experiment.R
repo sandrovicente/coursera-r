@@ -32,13 +32,31 @@ library(datasets)
 
 summary(ToothGrowth)
 
+## shows clusters
+ggplot(data=tg, aes(x=len, y=dose, group=supp, colour=supp)) +
+    geom_point() 
+
+# pre analysis on data
+
 tg <- ToothGrowth
 tg$dose <- factor(tg$dose)
 tg$supp.dose <- factor(tg$)
 
-## shows clusters
-ggplot(data=tg, aes(x=len, y=dose, group=supp, colour=supp)) +
-    geom_point() 
+calc_interval <- function(x, conf) {
+    quantile <- 1-(1-conf)/2
+    (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
+} 
+
+confidence <- 0.95
+
+for (supp in levels(tg$supp)) {
+    for (dose in levels(tg$dose)) {
+        print(dose)
+        print(supp)
+        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        print(calc_interval(dose.supp, confidence))
+    }
+}
 
 # http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
 # http://www.cookbook-r.com/Graphs/index.html
@@ -49,22 +67,33 @@ d2 <- tg %>% filter(dose=="2") %>% select(len)
 d1 <- tg %>% filter(dose=="1") %>% select(len)
 d1_2 <- tg %>% filter(dose=="0.5") %>% select(len)
 
-calc_interval <- function(x, conf) {
+calc_interval2 <- function(x, conf) {
     quantile <- 1-(1-conf)/2
-    (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
+    sd <- sd(x)/sqrt(length(x))
+    m <- mean(x)
+    interval <- (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
+    list(quantile=quantile, sd=sd, m=m, interval=interval)
 } 
 
-confidence <- 0.95
+colours <- c("green", "blue", "magenta", "red", "orange", "black")
+g <- ggplot(tg, aes(x=len))
+i <- 1
+for (supp in levels(tg$supp)) {
+    x <- tg[tg$supp==supp,"len"]
+    l <- calc_interval2(x, confidence)
+    g <- g + stat_function(fun=dnorm, args=list(mean=l$m, sd=l$sd), colour=colours[i])
+    i <- i + 1
+}
+g
 
-tg <- ToothGrowth
-tg$dose <- factor(tg$dose)
-tg$supp <- factor(tg$supp)
 
 for (supp in levels(tg$supp)) {
     for (dose in levels(tg$dose)) {
-        print(dose)
-        print(supp)
-        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
-        print(calc_interval(dose.supp, confidence))
+        x <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        l <- calc_interval2(x, confidence)
+        g <- g + stat_function(fun=dnorm, args=list(mean=l$m, sd=l$sd), colour=colours[i])
+        i <- i + 1
     }
 }
+g
+

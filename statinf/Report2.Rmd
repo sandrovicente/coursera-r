@@ -1,0 +1,74 @@
+---
+title: "Analysis of vitamin C intake against tooth growth"
+author: "Sandro Vicente"
+date: "Sunday, May 17, 2015"
+output: html_document
+---
+
+### Overview
+
+to do...
+
+### Obtaining Data
+
+```{r} 
+library(datasets)
+
+library(ggplot2)
+## shows clusters
+ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
+    geom_point() 
+
+```
+
+```{r}
+# pre analysis on data
+
+tg <- ToothGrowth
+tg$dose <- factor(tg$dose)
+tg$supp <- factor(tg$supp)
+
+summary(tg)
+```
+
+Define a function to obtain the range of values under a percentage of confidence.
+```{r}
+calc_interval <- function(x, conf) {
+    quantile <- 1-(1-conf)/2
+    (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
+} 
+
+confidence <- 0.95
+```
+
+Analysis over different supplement types
+```{r}
+for (supp in levels(tg$supp)) {
+    print(supp)
+
+    x <- tg[tg$supp==supp,"len"]
+    print(calc_interval(x, confidence))
+}
+```
+
+Analysis over different doses
+```{r}
+for (dose in levels(tg$dose)) {
+    print(dose)
+
+    x <- tg[tg$dose==dose,"len"]
+    print(calc_interval(x, confidence))
+}
+```
+
+Drill down into supplement types and doses
+```{r}
+for (dose in levels(tg$dose)) {
+    for (supp in levels(tg$supp)) {
+        print(c(dose,supp))
+
+        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        print(calc_interval(dose.supp, confidence))
+    }
+}
+```

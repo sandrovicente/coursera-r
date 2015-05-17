@@ -87,7 +87,7 @@ calc_interval <- function(x, conf) {
     n <- length(x)
     sd <- sd(x)
     m <- mean(x)
-    interval <- (m+c(-1,1)*qnorm(quantile)*sd)    
+    interval <- (m+c(-1,1)*qnorm(quantile)*sd/sqrt(n))    
     list(quantile=quantile, n=n, sd=sd, m=m, interval=interval)
 } 
 
@@ -155,5 +155,5 @@ ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..
     facet_wrap(~ type, ncol=3)
 
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x=predicted, y=density, color=type))
+    geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) 
 

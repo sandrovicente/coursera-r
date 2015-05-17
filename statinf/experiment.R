@@ -34,6 +34,7 @@ summary(ToothGrowth)
 
 tg <- ToothGrowth
 tg$dose <- factor(tg$dose)
+tg$supp.dose <- factor(tg$)
 
 ## shows clusters
 ggplot(data=tg, aes(x=len, y=dose, group=supp, colour=supp)) +
@@ -53,37 +54,17 @@ calc_interval <- function(x, conf) {
     (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
 } 
 
-confidence <- 0.99
-
-d2 <- tg %>% filter(dose=="2") %>% select(len)
-d1 <- tg %>% filter(dose=="1") %>% select(len)
-d1_2 <- tg %>% filter(dose=="0.5") %>% select(len)
-
-calc_interval(d2$len, confidence)
-calc_interval(d1$len, confidence)
-calc_interval(d1_2$len, confidence)
-
-doj <- tg %>% filter(supp=="OJ") %>% select(len)
-dvc <- tg %>% filter(supp=="VC") %>% select(len)
-
-calc_interval(doj$len, confidence)
-calc_interval(dvc$len, confidence)
-
 confidence <- 0.95
 
-d2.oj <- tg %>% filter(dose=="2", supp=="OJ") %>% select(len)
-d1.oj <- tg %>% filter(dose=="1" ,supp=="OJ") %>% select(len)
-d1_2.oj <- tg %>% filter(dose=="0.5", supp=="OJ") %>% select(len)
+tg <- ToothGrowth
+tg$dose <- factor(tg$dose)
+tg$supp <- factor(tg$supp)
 
-calc_interval(d2.oj$len, confidence)
-calc_interval(d1.oj$len, confidence)
-calc_interval(d1_2.oj$len, confidence)
-
-
-d2.vc <- tg %>% filter(dose=="2", supp=="VC") %>% select(len)
-d1.vc <- tg %>% filter(dose=="1" ,supp=="VC") %>% select(len)
-d1_2.vc <- tg %>% filter(dose=="0.5", supp=="VC") %>% select(len)
-
-calc_interval(d2.vc$len, confidence)
-calc_interval(d1.vc$len, confidence)
-calc_interval(d1_2.vc$len, confidence)
+for (supp in levels(tg$supp)) {
+    for (dose in levels(tg$dose)) {
+        print(dose)
+        print(supp)
+        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        print(calc_interval(dose.supp, confidence))
+    }
+}

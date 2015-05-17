@@ -16,7 +16,9 @@ Data is obtained from standard R datasets.
 ```{r} 
 library(datasets)
 
-library(ggplot2)
+library(ggplot2) # auxiliry libraries added
+library(plyr)
+
 ## shows clusters
 ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
     geom_point() + ggtitle("Figure 1 - Distribution of length per supplement type and dose") 
@@ -48,7 +50,7 @@ For that, a function is defined to take a number of samples and estimate the mea
 calc_interval <- function(x, conf) {
     quantile <- 1-(1-conf)/2
     n <- length(x)
-    sd <- sd(x)/sqrt(n)
+    sd <- sd(x)
     m <- mean(x)
     interval <- (m+c(-1,1)*qnorm(quantile)*sd)    
     list(quantile=quantile, n=n, sd=sd, m=m, interval=interval)
@@ -73,7 +75,7 @@ Analysis over different doses
 for (dose in levels(tg$dose)) {
     x <- tg[tg$dose==dose,"len"]
     l <- calc_interval(x, confidence)
-    print(sprintf("Dosage: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
+    print(sprintf("Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 ```
 
@@ -81,10 +83,9 @@ Drill down into supplement types and doses
 ```{r}
 for (dose in levels(tg$dose)) {
     for (supp in levels(tg$supp)) {
-        print(c(dose,supp))
-
-        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
-        print(calc_interval(dose.supp, confidence))
+        x <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        l <- calc_interval(x, confidence)
+        print(sprintf("Supplement:%s, Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
     }
 }
 ```

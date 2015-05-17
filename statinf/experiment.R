@@ -81,19 +81,24 @@ i <- 1
 for (supp in levels(tg$supp)) {
     x <- tg[tg$supp==supp,"len"]
     l <- calc_interval2(x, confidence)
-    g <- g + stat_function(fun=dnorm, args=list(mean=l$m, sd=l$sd), colour=colours[i])
+    print(supp); print(i)
+    g <- g + stat_function(fun=dnorm, args=list(mean=l$m, sd=l$sd), colour=colours[i], aes(colour = tg$supp ))
     i <- i + 1
 }
-g
+g + scale_colour_manual("Lgend title", values = colours)
 
 
 for (supp in levels(tg$supp)) {
     for (dose in levels(tg$dose)) {
         x <- tg[tg$supp==supp & tg$dose==dose,"len"]
         l <- calc_interval2(x, confidence)
+        print(colours[i])
         g <- g + stat_function(fun=dnorm, args=list(mean=l$m, sd=l$sd), colour=colours[i])
         i <- i + 1
     }
 }
 g
 
+g + scale_fill_identity(name = 'the fill', guide = 'legend',labels = c('m1')) +
+    scale_colour_manual(name = 'the colour', 
+                        values =c('black'='black','red'='red'), labels = c('c2','c1'))

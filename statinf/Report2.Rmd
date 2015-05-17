@@ -11,53 +11,69 @@ to do...
 
 ### Obtaining Data
 
+Data is obtained from standard R datasets.
+
 ```{r} 
 library(datasets)
 
 library(ggplot2)
 ## shows clusters
 ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
-    geom_point() 
+    geom_point() + ggtitle("Figure 1 - Distribution of length per supplement type and dose") 
 
 ```
 
-```{r}
-# pre analysis on data
+A first exploratory plot (figure 1) shows that lenght tend to increase with the dose. 
+OJ supplement seems to have more influence in growth for doses of 0.5mg and 1mg.
 
+We can convert doses and supplement types into factors to perform further analysis.
+
+```{r}
 tg <- ToothGrowth
 tg$dose <- factor(tg$dose)
 tg$supp <- factor(tg$supp)
 
 summary(tg)
-```
 
-Define a function to obtain the range of values under a percentage of confidence.
+table(tg[,c("supp", "dose")])
+```
+We have the same number of observations for each combination of doses (`r levels(tg$dose)`) and and supplements (`r levels(tg$supp)`).
+
+We can initially explore how the type of supplement alone affects variations in length.
+
+For that, a function is defined to take a number of samples and estimate the mean, standard error and the limits of values for a confidence interval using the Central Limit Theorem.
+
+*Here we assume all samples are IID*
 ```{r}
 calc_interval <- function(x, conf) {
     quantile <- 1-(1-conf)/2
-    (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
+    n <- length(x)
+    sd <- sd(x)/sqrt(n)
+    m <- mean(x)
+    interval <- (m+c(-1,1)*qnorm(quantile)*sd)    
+    list(quantile=quantile, n=n, sd=sd, m=m, interval=interval)
 } 
 
-confidence <- 0.95
+confidence <- 0.95 
 ```
 
-Analysis over different supplement types
+Analysis over different supplement types. 
+For all analysis we use the confidence interval of `r confidence`.
 ```{r}
 for (supp in levels(tg$supp)) {
-    print(supp)
-
     x <- tg[tg$supp==supp,"len"]
-    print(calc_interval(x, confidence))
+    l <- calc_interval(x, confidence)
+    print(sprintf("Supplement: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 ```
+For the given confidence, we can see that both invervals overlap, so the supplement type alone is not significat to correspond the length.
 
 Analysis over different doses
 ```{r}
 for (dose in levels(tg$dose)) {
-    print(dose)
-
     x <- tg[tg$dose==dose,"len"]
-    print(calc_interval(x, confidence))
+    l <- calc_interval(x, confidence)
+    print(sprintf("Dosage: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 ```
 

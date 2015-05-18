@@ -85,35 +85,39 @@ library(plyr)
 calc_interval <- function(x, conf) {
     quantile <- 1-(1-conf)/2
     n <- length(x)
-    sd <- sd(x)
+    sdn <- sd(x)/sqrt(n)
     m <- mean(x)
-    interval <- (m+c(-1,1)*qnorm(quantile)*sd/sqrt(n))    
-    list(quantile=quantile, n=n, sd=sd, m=m, interval=interval)
+    interval <- (m+c(-1,1)*qnorm(quantile)*sdn)    
+    list(quantile=quantile, n=n, sd=sdn, m=m, interval=interval)
 } 
 
-tg <- ToothGrowth
-tg$dose <- factor(tg$dose)
-tg$supp <- factor(tg$supp)
+confidence <- 0.95 
 
-len.min <- min(tg$len)
-len.max <- max(tg$len)
-len.x <- seq(len.min, len.max, length=100)
+for (supp in levels(tg$supp)) {
+    x <- tg[tg$supp==supp,"len"]
+    l <- calc_interval(x, confidence)
+    print(sprintf("Supplement: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
+}
 
-confidence <- 0.95
-
-## data for dosage
-
-data.type <- data.frame()
-norm.type <- data.frame()
+data.type <- data.frame()  # dataframe containg data per type (i.e. per dose)
+norm.type <- data.frame()  # dataframe containg summarized for normal distribution per type (i.e. per dose)
 for (dose in levels(tg$dose)) {
     x <- tg[tg$dose==dose,"len"]
-    ds <- data.frame(x=x, type=dose)
+    ds <- data.frame(x=x, type=dose)  
     data.type <- rbind(data.type, ds)
     
     l <- calc_interval(x, confidence)
-    norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=dose))
+    norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=dose)) # data for normal distribution of sample
+    
+    print(sprintf("Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 
+# Calculate normal values for reference 
+len.min <- min(tg$len) # minimum length
+len.max <- max(tg$len) # maximum legth
+len.x <- seq(len.min, len.max, length=100) # range of lengths from min to max 
+
+# function to calculate normal densities given data frame containg "type", "m" mean and "sd" sample's standard deviation
 calc_normal <- function(nt) {
     ddply(norm.type, "type", function(df) {
         data.frame( 
@@ -123,37 +127,13 @@ calc_normal <- function(nt) {
     })
 }
 
-normaldens <- calc_normal(norm.type)
+normaldens <- calc_normal(norm.type) # normal densities for the corresponding types
 
+# plot histogram and corresponding normal distributions in separated frames
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x = predicted, y=density)) +
     facet_wrap(~ type, ncol=3)
 
-ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x=predicted, y=density, color=type))
-
-
-## data for all combinations
-
-data.type <- data.frame()
-norm.type <- data.frame()
-for (supp in levels(tg$supp)) {
-    for (dose in levels(tg$dose)) {
-        x <- tg[tg$supp==supp & tg$dose==dose,"len"]
-        l <- calc_interval(x, confidence)
-        
-        ds <- data.frame(x=x, type=paste(supp,dose,sep="-"))
-        data.type <- rbind(data.type, ds)
-        norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=paste(supp,dose,sep="-")))
-    }
-}
-
-normaldens <- calc_normal(norm.type)
-
-ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x = predicted, y=density)) +
-    facet_wrap(~ type, ncol=3)
-
+# plot histogram and normal distributions altogether
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) 
-

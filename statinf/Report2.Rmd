@@ -21,7 +21,7 @@ library(plyr)
 
 ## shows clusters
 ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
-    geom_point() + ggtitle("Figure 1 - Distribution of length per supplement type and dose") 
+    geom_point() + ggtitle("Fig. 1 - Distribution of length per supplement type and dose") 
 
 ```
 
@@ -68,9 +68,11 @@ for (supp in levels(tg$supp)) {
     print(sprintf("Supplement: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 ```
-Both invervals overlap, so the supplement type alone is not significat to correspond the length with the given confidence of `r confidence`.
 
-Analysis over different doses
+Both invervals overlap, therefore, the supplement type alone cannot significantly determine the average teeth length of the population with a confidence of `r confidence*100`%. 
+
+We can proceed with the analysis of the impact of the dosage on the average length of the population.
+
 ```{r}
 
 data.type <- data.frame()  # dataframe containg data per type (i.e. per dose)
@@ -106,25 +108,33 @@ normaldens <- calc_normal(norm.type) # normal densities for the corresponding ty
 # plot histogram and corresponding normal distributions in separated frames
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x = predicted, y=density)) +
-    facet_wrap(~ type, ncol=3)
+    facet_wrap(~ type, ncol=3) +
+    xlab("Length") + ggtitle("Fig. 2.a - Teeth length and its average distribution per dosage") 
 
 # plot histogram and normal distributions altogether
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) 
+    geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) +
+    xlab("Length") + ggtitle("Fig. 2.b - Teeth length and its average distribution per dosage overlayed") 
 
 ```
 
-Drill down into supplement types and doses
+The observations show strong evidence of increase on the average teeth size in populations with consumption of higher dosage of Vitamin C. 
+The distributions of the average length in populations for different dosages are show in figures 2.a and 2.b.
+In other words, the average teeth length of a population can determine the dosage of Vitamin C consumed with `r confidence*100`% of confidence.
+
+It remains to be seen wheather the supplement type, for a given dosage, has impact on the average size of the teeth in a population.  
+For that, we drill down into supplement types and doses
+
 ```{r}
 
 data.type <- data.frame()  # reset dataframe containg data per type (i.e. per dose and supp)
 norm.type <- data.frame()  # reset dataframe containg summarized for normal distribution per type (i.e. per dose and supp)
 for (dose in levels(tg$dose)) {
     for (supp in levels(tg$supp)) {
-        x <- tg[tg$supp==supp & tg$dose==dose,"len"]
+        x <- tg[tg$supp==supp & tg$dose==dose,"len"] # filter supp and dose
         l <- calc_interval(x, confidence)
         
-        ds <- data.frame(x=x, type=paste(supp,dose,sep="-"))
+        ds <- data.frame(x=x, type=paste(supp,dose,sep="-")) # type defined as composition supp "-" dose
         data.type <- rbind(data.type, ds)
         norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=paste(supp,dose,sep="-"))) # type defined as composition supp "-" dose
 
@@ -138,9 +148,20 @@ normaldens <- calc_normal(norm.type)
 # plot histogram and corresponding normal distributions in separated frames
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x = predicted, y=density)) +
-    facet_wrap(~ type, ncol=3)
+    facet_wrap(~ type, ncol=3) + 
+    xlab("Length") + ggtitle("Fig. 3.a - Length and average distribution / dosage and supplement") 
 
 # plot histogram and corresponding normal distributions althogether
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x=predicted, y=density, color=type))
+    geom_line(data=normaldens, aes(x=predicted, y=density, color=type))+ 
+    xlab("Length") + ggtitle("Fig. 3.b - Length and avg. distribution / dosage and supplement (overlay)") 
+
 ```
+
+From the values obtained and from the figures 3a and 3b, we can see that the supplement type has more influence in the average lenght for lower dosages, especially for 0.5 mg.
+For this dosage, the OJ correspond to a greater average teeth leght, compared to VC. 
+
+In particular, the average length distribution for the group OJ-0.5 overlaps the length distribution for the group VC-1, so the average length cannot distinguish such groups with the given confidence.
+The same happens with the distributions of average lengths for the groups OJ-1,  OJ-2 and VC-2.
+
+For the dosage of 2mg (OJ-2 and VC-2), the distributions are superposed, with almost the same mean. For the level of confidence of `r confidence*100`%, the average teeth lenght of a population cannot distinguish if it is in the groups OJ-1, OJ-2 or VC-2.

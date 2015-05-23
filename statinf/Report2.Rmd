@@ -1,5 +1,5 @@
 ---
-title: "Analysis of vitamin C intake against tooth growth"
+title: "Analysis of vitamin C intake against teeth growth"
 author: "Sandro Vicente"
 date: "Sunday, May 17, 2015"
 output: html_document
@@ -7,7 +7,9 @@ output: html_document
 
 ### Overview
 
-to do...
+In this report we analyse the influence of Vitamin C against odontoblasts (teeth) growth in Guinea Pigs. 
+We compare dosages and supplement types against the observed average teeth lengths, using both Normal distribution and Students distribution. Observations are initially split into groups regarding supplement type, then regarding dosage.
+Finally both dosage and supplement types are analysed against average teeth lenght observed in its corresponding groups.
 
 ### Obtaining Data
 

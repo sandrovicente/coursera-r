@@ -40,42 +40,12 @@ ggplot(data=tg, aes(x=len, y=dose, group=supp, colour=supp)) +
 
 tg <- ToothGrowth
 tg$dose <- factor(tg$dose)
-tg$supp.dose <- factor(tg$)
+tg$supp <- factor(tg$supp)
 
-calc_interval <- function(x, conf) {
-    quantile <- 1-(1-conf)/2
-    (mean(x)+c(-1,1)*qnorm(quantile)*sd(x)/sqrt(length(x)))    
-} 
-
-confidence <- 0.95
-
-for (supp in levels(tg$supp)) {
-    for (dose in levels(tg$dose)) {
-        print(dose)
-        print(supp)
-        dose.supp <- tg[tg$supp==supp & tg$dose==dose,"len"]
-        print(calc_interval(dose.supp, confidence))
-    }
-}
-
-
-for (supp in levels(tg$supp)) {
-        print(dose)
-        print(supp)
-        dose.supp <- tg[tg$supp==supp,"len"]
-        print(calc_interval(dose.supp, confidence))
-}
 
 # http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
 # http://www.cookbook-r.com/Graphs/index.html
 
-library(dplyr)
-
-g <- ggplot(tg, aes(x=len)) 
-
-d2 <- tg %>% filter(dose=="2") %>% select(len)
-d1 <- tg %>% filter(dose=="1") %>% select(len)
-d1_2 <- tg %>% filter(dose=="0.5") %>% select(len)
 
 #####
 library(datasets)
@@ -93,11 +63,25 @@ calc_interval <- function(x, conf) {
 
 confidence <- 0.95 
 
+# function to calculate normal densities given data frame containg "type", "m" mean and "sd" sample's standard deviation
+calc_normal <- function(nt) {
+    ddply(norm.type, "type", function(df) {
+        data.frame( 
+            predicted = len.x,
+            density = dnorm(len.x, mean=df$m, sd=df$sd)
+        )
+    })
+}
+
+data.supp <- data.frame()
 for (supp in levels(tg$supp)) {
     x <- tg[tg$supp==supp,"len"]
     l <- calc_interval(x, confidence)
+    data.supp <- rbind(data.supp, data.frame(x=x, type=supp))
     print(sprintf("Supplement: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
+
+t.test(subset(data.supp, type=="OJ")$x, subset(data.supp, type="VC")$x)
 
 data.type <- data.frame()  # dataframe containg data per type (i.e. per dose)
 norm.type <- data.frame()  # dataframe containg summarized for normal distribution per type (i.e. per dose)
@@ -112,20 +96,13 @@ for (dose in levels(tg$dose)) {
     print(sprintf("Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 
+apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {c(t, t.test(x ~ type, data=subset(data.type, type %in% t))$conf)})
+
+
 # Calculate normal values for reference 
 len.min <- min(tg$len) # minimum length
 len.max <- max(tg$len) # maximum legth
 len.x <- seq(len.min, len.max, length=100) # range of lengths from min to max 
-
-# function to calculate normal densities given data frame containg "type", "m" mean and "sd" sample's standard deviation
-calc_normal <- function(nt) {
-    ddply(norm.type, "type", function(df) {
-        data.frame( 
-            predicted = len.x,
-            density = dnorm(len.x, mean=df$m, sd=df$sd)
-        )
-    })
-}
 
 normaldens <- calc_normal(norm.type) # normal densities for the corresponding types
 
@@ -137,3 +114,30 @@ ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..
 # plot histogram and normal distributions altogether
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) 
+
+
+data.type <- data.frame()  # reset dataframe containg data per type (i.e. per dose and supp)
+norm.type <- data.frame()  # reset dataframe containg summarized for normal distribution per type (i.e. per dose and supp)
+for (dose in levels(tg$dose)) {
+    for (supp in levels(tg$supp)) {
+        x <- tg[tg$supp==supp & tg$dose==dose,"len"] # filter supp and dose
+        l <- calc_interval(x, confidence)
+        
+        ds <- data.frame(x=x, type=paste(supp,dose,sep="-")) # type defined as composition supp "-" dose
+        data.type <- rbind(data.type, ds)
+        norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=paste(supp,dose,sep="-"))) # type defined as composition supp "-" dose
+        
+        print(sprintf("Supplement:%s, Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
+    }
+}
+
+d <- subset(data.type, type %in% c("OJ-1", "OJ-2")); t.test( x ~ type, data=d)
+t.test(x ~ type, data=subset(data.type, type %in% c("OJ-1", "VC-2")))
+
+apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {t.test(x ~ type, data=subset(data.type, type %in% t))})
+
+
+apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {
+    conf <- t.test(x ~ type, data=subset(data.type, type %in% t))$conf
+    c(t, conf, ifelse(conf[1]*conf[2]>0,"OK","UNCONFIRMED"))
+})

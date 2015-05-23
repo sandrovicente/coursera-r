@@ -62,14 +62,24 @@ confidence <- 0.95
 Analysis over different supplement types. 
 For all analysis we use the confidence interval of `r confidence`.
 ```{r}
+data.supp <- data.frame()
 for (supp in levels(tg$supp)) {
-    x <- tg[tg$supp==supp,"len"]
+    x=tg[tg$supp==supp,"len"]
+    data.supp <- rbind(data.supp, data.frame(x=x, type=supp))
     l <- calc_interval(x, confidence)
     print(sprintf("Supplement: %s, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
 }
 ```
 
-Both invervals overlap, therefore, the supplement type alone cannot significantly determine the average teeth length of the population with a confidence of `r confidence*100`%. 
+Both invervals overlap, therefore, following the normal distribution the supplement type alone cannot significantly determine the average teeth length of the population with a confidence of `r confidence*100`%.
+
+Since the sample size is relatively small, we can use the T distribution to test the samples regarding supplement types. We assume that the observations are statistically independent.
+
+```{r}
+t.test(x ~ type, data=data.supp)$conf
+```
+
+Zero is in the confidence interval, which confirms that the supplement type cannot determine the teeth lenght.
 
 We can proceed with the analysis of the impact of the dosage on the average length of the population.
 
@@ -118,9 +128,19 @@ ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..
 
 ```
 
-The observations show strong evidence of increase on the average teeth size in populations with consumption of higher dosage of Vitamin C. 
+The observations show strong evidence of increase on the average teeth size in populations with consumption of higher dosage of Vitamin C, . 
 The distributions of the average length in populations for different dosages are show in figures 2.a and 2.b.
 In other words, the average teeth length of a population can determine the dosage of Vitamin C consumed with `r confidence*100`% of confidence.
+
+Again, due to relatively small sample sizes, we can verify this using T-student. As stated earlier, we assume that observations are statistically independent.
+
+```{r}
+
+apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {c(t, t.test(x ~ type, data=subset(data.type, type %in% t))$conf)})
+    
+```
+
+Zero isn't included in any of the ranges, which confirms statistically significant association between dosage and average teeth size.
 
 It remains to be seen wheather the supplement type, for a given dosage, has impact on the average size of the teeth in a population.  
 For that, we drill down into supplement types and doses
@@ -165,3 +185,20 @@ In particular, the average length distribution for the group OJ-0.5 overlaps the
 The same happens with the distributions of average lengths for the groups OJ-1,  OJ-2 and VC-2.
 
 For the dosage of 2mg (OJ-2 and VC-2), the distributions are superposed, with almost the same mean. For the level of confidence of `r confidence*100`%, the average teeth lenght of a population cannot distinguish if it is in the groups OJ-1, OJ-2 or VC-2.
+
+The samples for these groups are the smallest, so it is important to confirm the results with T tests. We assume independent observations.
+
+``` {r}
+
+apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {
+    conf <- t.test(x ~ type, data=subset(data.type, type %in% t))$conf
+    c(t, conf, ifelse(conf[1]*conf[2]>0,"OK","UNCONFIRMED"))
+})
+    
+```
+
+Interestingly, for tests with Student's T distribution, the intervals show that the lenghts can be significantly (`r confidence*100`%) mapped into each of the groups with only the exceptions of groups OJ-1 agaist VC-2 and OJ-2 against VC-2. 
+
+These results confirm that at lower dosages, the supplement has stronger influence on the average teeth length. Specifically, the OJ supplement is more effective in increasing the length.
+
+OJ for 1mg is not distinguishable from VC for 2mg, and for the dosage of 2mg, both OJ and VC supplements have similar infuence.

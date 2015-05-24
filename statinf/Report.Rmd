@@ -1,7 +1,6 @@
 ---
 title: "Statistical Inference - Analysis of Exponential Distribution"
 author: "Sandro Vicente"
-date: "Saturday, May 16, 2015"
 output: html_document
 ---
 ### Overview
@@ -49,12 +48,7 @@ We can see that the theoretical mean and standard deviations match the values fo
 The Figure 1 shows a plot of the density of values from the raw data, which follows a typical exponential distribution curve.
 The mean (marked in red) is the "centre of mass" of the curve.
 
-```{r}
-library(ggplot2)
-
-DF.ALL <- data.frame(values=ALL)
-ggplot(DF.ALL, aes(x=values)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + xlim(0, 35) + xlab("All values") + ggtitle("Figure 1 - Density of raw samples") + geom_vline(aes(xintercept=5), colour="red")
-```
+### Analysis
 
 Now we can calculate the mean of samples of `r n` values from the raw data. 
 
@@ -63,8 +57,8 @@ MEAN <- matrix(ALL, nosim)   # split in blocks of 'n' samples
 means <- apply(MEAN, 1, mean) # calculate the mean of each block
 ```
 
+And calculate the mean and standard error for the means of 'n' samples.
 
-And calculate the mean and standard error for the means of 'n' samples
 ```{r}
 
 m.means <- mean(means) 
@@ -76,15 +70,36 @@ m.means  # mean of means of 'n' samples
 sd.means # sd calculated from the means of 'n' samples
 sd.n # sd based on original sd, corrected for mean of 'n' samples
 ```
+
 Above, for the standard errors, calculating it directly from the means or using the value from the raw standard error divided by square root of `r n` result in similar values.
 
-These results are compatible with the theoretical value for standard error of a sample of size 'n'=`r n` :
+These results are compatible with the theoretical value for standard error of a sample of size 'n'=`r n`:
+
 ```{r}
 sd.dist / sqrt(n) 
 ```
 
 When we plot the distribution of *means of samples* of 'n' = `r n`, we obtain a curve that resambles a Gaussian, shown in figure 2. 
+
 The red line shows the distribution's mean `r m.means`, which matches the area with highest density in the distribution. The blue line shows the theoretical mean `r m.dist`.
+
+### Analysis of the results
+
+We can compare the distribution of means of samples agaist a normal distribution with the same mean and standard error. This is shown in the figure 3.
+
+This confirms the *Central Limit Theorem*, which states that the distribution of averages of iid variables becomes that of a standard normal as the sample size increases. 
+
+In the case of this experiment, we used an sample of `r nosim` means of `r n` samples originated from an exponential distribution of lambda `r lambda`. The distribution of the means of 'n' values yielded results consistent with the ones of a normal distribution.
+
+
+### Appendix: Charts
+
+```{r fig.width=8, fig.height=4, message=FALSE}
+library(ggplot2)
+
+DF.ALL <- data.frame(values=ALL)
+ggplot(DF.ALL, aes(x=values)) + geom_histogram(binwidth=.1, aes(y= ..density..)) + xlim(0, 35) + xlab("All values") + ggtitle("Figure 1 - Density of raw samples") + geom_vline(aes(xintercept=5), colour="red")
+```
 
 ```{r}
 DF <- data.frame(means=means)
@@ -93,14 +108,7 @@ ggplot(DF.ALL, aes(x=means)) + geom_histogram(binwidth=.1, aes(y= ..density..)) 
 
 ```
 
-### Analysis of the results
-
-We can compare the distribution of means of samples agaist a normal distribution with the same mean and standard error. This is shown in the figure 3.
-
 ```{r}
 
 ggplot(DF, aes(x=means)) + geom_histogram(alpha=0.3,binwidth=.1, aes(y= ..density..)) + stat_function(fun=dnorm, args=list(mean=m.means, sd=sd.means)) + ggtitle("Figure 3 - Means of 'n' samples against normal distribution ") 
 ```
-
-This confirms the *Central Limit Theorem*, which states that the distribution of averages of iid variables becomes that of a standard normal as the sample size increases. 
-In the case of this experiment, we used an sample of `r nosim` means of `r n` samples originated from an exponential distribution of lambda `r lambda`. The distribution of the means of 'n' values yielded results consistent with the ones of a normal distribution.

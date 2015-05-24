@@ -1,68 +1,42 @@
 ---
 title: "Analysis of vitamin C intake against teeth growth"
 author: "Sandro Vicente"
-date: "Sunday, May 17, 2015"
 output: html_document
 ---
 
-### Overview
+#### Overview
 
 In this report we analyse the influence of Vitamin C against odontoblasts (teeth) growth in Guinea Pigs. 
-We compare dosages and supplement types against the observed average teeth lengths, using both Normal distribution and Students distribution. Observations are initially split into groups regarding supplement type, then regarding dosage.
-Finally both dosage and supplement types are analysed against average teeth lenght observed in its corresponding groups.
+We compare both dosage and supplement types against the observed average teeth lengths, using both Normal distribution and Student's distribution. 
 
-### Obtaining Data
-
-Data is obtained from standard R datasets.
-
-```{r} 
-library(datasets)
-
-library(ggplot2) # auxiliry libraries added
-library(plyr)
-
-## shows clusters
-ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
-    geom_point() + ggtitle("Fig. 1 - Distribution of length per supplement type and dose") 
-
-```
+#### Data and Analysis
 
 A first exploratory plot (figure 1) shows that lenght tend to increase with the dose. 
 OJ supplement seems to have more influence in growth for doses of 0.5mg and 1mg.
 
-We can convert doses and supplement types into factors to perform further analysis.
-
-```{r}
+```{r fig.width=6, fig.height=4} 
+library(datasets)
+# We can convert doses and supplement types into factors to perform further analysis.
 tg <- ToothGrowth
 tg$dose <- factor(tg$dose)
 tg$supp <- factor(tg$supp)
-
-summary(tg)
-
+confidence <- 0.95 
 table(tg[,c("supp", "dose")])
 ```
-We have the same number of observations for each combination of doses (`r levels(tg$dose)`) and and supplements (`r levels(tg$supp)`).
 
-We can initially explore how the type of supplement alone affects variations in length.
+We have the same number of observations for each combination of doses (`r levels(tg$dose)`) and and supplements (`r levels(tg$supp)`). All samples are assumed to be IID.
 
-For that, a function is defined to take a number of samples and estimate the mean, standard error and the limits of values for a confidence interval using the Central Limit Theorem.
+We can initially explore how the type of supplement alone affects variations in length. 
+For all analysis we use the confidence interval of `r confidence`.
 
-*Here we assume all samples are IID*
 ```{r}
 calc_interval <- function(x, conf) {
     quantile <- 1-(1-conf)/2
-    n <- length(x)
-    sdn <- sd(x)/sqrt(n)
-    m <- mean(x)
-    interval <- (m+c(-1,1)*qnorm(quantile)*sdn)    
-    list(quantile=quantile, n=n, sd=sdn, m=m, interval=interval)
+    n <- length(x); sdn <- sd(x)/sqrt(n); m <- mean(x)
+    list(quantile=quantile, n=n, sd=sdn, m=m, interval=(m+c(-1,1)*qnorm(quantile)*sdn) )
 } 
-
-confidence <- 0.95 
 ```
 
-Analysis over different supplement types. 
-For all analysis we use the confidence interval of `r confidence`.
 ```{r}
 data.supp <- data.frame()
 for (supp in levels(tg$supp)) {
@@ -75,7 +49,7 @@ for (supp in levels(tg$supp)) {
 
 Both invervals overlap, therefore, following the normal distribution the supplement type alone cannot significantly determine the average teeth length of the population with a confidence of `r confidence*100`%.
 
-Since the sample size is relatively small, we can use the T distribution to test the samples regarding supplement types. We assume that the observations are statistically independent.
+Since the sample sizes are relatively small, we should use the T distribution to test the samples regarding supplement types. We assume that all observations are statistically independent.
 
 ```{r}
 t.test(x ~ type, data=data.supp)$conf
@@ -83,22 +57,41 @@ t.test(x ~ type, data=data.supp)$conf
 
 Zero is in the confidence interval, which confirms that the supplement type cannot determine the teeth lenght.
 
-We can proceed with the analysis of the impact of the dosage on the average length of the population.
+It remains to be seen wheather the supplement type, for a given dosage, has impact on the average size of the teeth in a population.  
+For that, we drill down into groups of observations for each supplement type and dosage.
 
 ```{r}
-
-data.type <- data.frame()  # dataframe containg data per type (i.e. per dose)
-norm.type <- data.frame()  # dataframe containg summarized for normal distribution per type (i.e. per dose)
+data.type <- data.frame()  # reset dataframe containg data per type (i.e. per dose and supp)
+norm.type <- data.frame()  # reset dataframe containg summarized for normal distribution per type (i.e. per dose and supp)
 for (dose in levels(tg$dose)) {
-    x <- tg[tg$dose==dose,"len"]
-    ds <- data.frame(x=x, type=dose)  
-    data.type <- rbind(data.type, ds)
-    
-    l <- calc_interval(x, confidence)
-    norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=dose)) # data for normal distribution of sample
-    
-    print(sprintf("Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
+    for (supp in levels(tg$supp)) {
+        x <- tg[tg$supp==supp & tg$dose==dose,"len"] # filter supp and dose
+        l <- calc_interval(x, confidence)
+        data.type <- rbind(data.type, data.frame(x=x, type=paste(supp,dose,sep="-"))) # type defined as composition supp "-" 
+        norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=paste(supp,dose,sep="-"))) # type defined as composition supp "-" dose
+        print(sprintf("Supplement:%s, Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
+    }
 }
+```
+
+From the values obtained above we can see that the supplement type has more influence in the average lenght for lower dosages, especially for 0.5 mg.
+For this dosage, the OJ correspond to a greater average teeth leght, compared to VC.
+
+Figure 2 shows the average length distributions for each group and corresponding gaussian curves.
+
+The samples for these groups are the smallest and we can observe a number of overlaps on the normal distributions. It is important to confirm the results with T tests. The results are shown on table 1
+
+Using Student's T distribution, the intervals show that the lenghts can be significantly (`r confidence*100`%) mapped into each of the groups with only the exceptions of groups OJ-1 agaist VC-2 and OJ-2 against VC-2, where the confidence interval of the differences in length include zero. 
+
+These results confirm that higher dosages correspond to greather mean teeth lengtht, and that at lower dosages, the supplement has stronger influence on the average teeth length. Specifically, the OJ supplement is more effective in increasing the length.
+OJ for 1mg is not distinguishable from VC for 2mg, and for the dosage of 2mg, both OJ and VC supplements have similar infuence.
+
+
+#### Appendix: Charts and Tables
+
+```{r fig.width=8, fig.height=4, message=FALSE}
+library(ggplot2) # auxiliry libraries added
+library(plyr)
 
 # Calculate normal values for reference 
 len.min <- min(tg$len) # minimum length
@@ -115,81 +108,20 @@ calc_normal <- function(nt) {
     })
 }
 
-normaldens <- calc_normal(norm.type) # normal densities for the corresponding types
-
-# plot histogram and corresponding normal distributions in separated frames
-ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x = predicted, y=density)) +
-    facet_wrap(~ type, ncol=3) +
-    xlab("Length") + ggtitle("Fig. 2.a - Teeth length and its average distribution per dosage") 
-
-# plot histogram and normal distributions altogether
-ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x=predicted, y=density, color=type)) +
-    xlab("Length") + ggtitle("Fig. 2.b - Teeth length and its average distribution per dosage overlayed") 
-
-```
-
-The observations show strong evidence of increase on the average teeth size in populations with consumption of higher dosage of Vitamin C, . 
-The distributions of the average length in populations for different dosages are show in figures 2.a and 2.b.
-In other words, the average teeth length of a population can determine the dosage of Vitamin C consumed with `r confidence*100`% of confidence.
-
-Again, due to relatively small sample sizes, we can verify this using T-student. As stated earlier, we assume that observations are statistically independent.
-
-```{r}
-
-apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {c(t, t.test(x ~ type, data=subset(data.type, type %in% t))$conf)})
-    
-```
-
-Zero isn't included in any of the ranges, which confirms statistically significant association between dosage and average teeth size.
-
-It remains to be seen wheather the supplement type, for a given dosage, has impact on the average size of the teeth in a population.  
-For that, we drill down into supplement types and doses
-
-```{r}
-
-data.type <- data.frame()  # reset dataframe containg data per type (i.e. per dose and supp)
-norm.type <- data.frame()  # reset dataframe containg summarized for normal distribution per type (i.e. per dose and supp)
-for (dose in levels(tg$dose)) {
-    for (supp in levels(tg$supp)) {
-        x <- tg[tg$supp==supp & tg$dose==dose,"len"] # filter supp and dose
-        l <- calc_interval(x, confidence)
-        
-        ds <- data.frame(x=x, type=paste(supp,dose,sep="-")) # type defined as composition supp "-" dose
-        data.type <- rbind(data.type, ds)
-        norm.type <- rbind(norm.type, data.frame(m=l$m, sd=l$sd, type=paste(supp,dose,sep="-"))) # type defined as composition supp "-" dose
-
-        print(sprintf("Supplement:%s, Dosage: %s mg, mean: %f, sd: %f, size: %d, range:[%f, %f]", supp, dose, l$m, l$sd, l$n, l$interval[1], l$interval[2]))
-    }
-}
+## shows clusters
+ggplot(data=ToothGrowth, aes(x=len, y=dose, group=supp, colour=supp)) +
+    geom_point() + ggtitle("Fig. 1 - Distribution of length per supplement type and dose") 
 
 # calculate normal distribution for types based on dose and supp
 normaldens <- calc_normal(norm.type)
 
-# plot histogram and corresponding normal distributions in separated frames
-ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
-    geom_line(data=normaldens, aes(x = predicted, y=density)) +
-    facet_wrap(~ type, ncol=3) + 
-    xlab("Length") + ggtitle("Fig. 3.a - Length and average distribution / dosage and supplement") 
-
 # plot histogram and corresponding normal distributions althogether
 ggplot(data.type, aes(x=x, fill=type)) +  geom_histogram(alpha = 0.5, aes(y = ..density..), position = 'identity') +
     geom_line(data=normaldens, aes(x=predicted, y=density, color=type))+ 
-    xlab("Length") + ggtitle("Fig. 3.b - Length and avg. distribution / dosage and supplement (overlay)") 
-
+    xlab("Length") + ggtitle("Fig.2 - Length and avg. distribution / dosage and supplement (overlay)") 
 ```
 
-From the values obtained and from the figures 3a and 3b, we can see that the supplement type has more influence in the average lenght for lower dosages, especially for 0.5 mg.
-For this dosage, the OJ correspond to a greater average teeth leght, compared to VC. 
-
-In particular, the average length distribution for the group OJ-0.5 overlaps the length distribution for the group VC-1, so the average length cannot distinguish such groups with the given confidence.
-The same happens with the distributions of average lengths for the groups OJ-1,  OJ-2 and VC-2.
-
-For the dosage of 2mg (OJ-2 and VC-2), the distributions are superposed, with almost the same mean. For the level of confidence of `r confidence*100`%, the average teeth lenght of a population cannot distinguish if it is in the groups OJ-1, OJ-2 or VC-2.
-
-The samples for these groups are the smallest, so it is important to confirm the results with T tests. We assume independent observations.
-
+**Table 1 - Student's confidence intervals for each group of dosage and supplement**
 ``` {r}
 
 apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {
@@ -198,9 +130,3 @@ apply(combn(levels(data.type$type),2, simplify=T), 2, function(t) {
 })
     
 ```
-
-Interestingly, for tests with Student's T distribution, the intervals show that the lenghts can be significantly (`r confidence*100`%) mapped into each of the groups with only the exceptions of groups OJ-1 agaist VC-2 and OJ-2 against VC-2. 
-
-These results confirm that at lower dosages, the supplement has stronger influence on the average teeth length. Specifically, the OJ supplement is more effective in increasing the length.
-
-OJ for 1mg is not distinguishable from VC for 2mg, and for the dosage of 2mg, both OJ and VC supplements have similar infuence.

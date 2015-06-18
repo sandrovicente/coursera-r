@@ -37,8 +37,9 @@ with(mtcars, plot(cyl, mpg, pch=19, col=am+1))
 
 with(mtcars, plot(am, mpg, pch=19, col=am+1))
 
-legend("topright", pch = 19, col = c(0,1)+1, legend = c("Auto", "Man"))
+with(mtcars, plot(am, vs, pch=19, col=am+1))
 
+legend("topright", pch = 19, col = c(0,1)+1, legend = c("Auto", "Man"))
 
 
 # didn't get this chart yet...
@@ -82,11 +83,25 @@ anova(fit_wt, fit2_wt)$Pr[2]
 
 ###--
 
-vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb" )
+# gear not included - not data covering both am = 0 and 1 for 3 and 5 gears
+# vs - not included 
+
+vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
 for (v in vars) {
-    a<-anova(lm(mpg ~ wt, data=mtcars), lm(as.formula(paste("mpg ~ wt ", v, sep="+")), data=mtcars))
-    print(v); print(a$Pr[2])
+    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+             lm(as.formula(paste("mpg ~ factor(am) ", v, sep="+")), data=mtcars))
     if (a$Pr[2] < 0.05) {
+        print(v); print(a$Pr[2])
+    }
+}
+
+
+vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
+for (v in vars) {
+    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+             lm(as.formula(paste("mpg ~ factor(am) ", v, sep=":")), data=mtcars))
+    if (a$Pr[2] < 0.05) {
+        #print(v); print(a$Pr[2])
         print(a)
     }
 }

@@ -11,16 +11,29 @@ Overview Text
 
 #### Analysis
 
-Analysis text
-
-```{r}
-library(dplyr)
+```{r message=FALSE}
 library(ggplot2)
 library(car)
 data(mtcars)
 ```
 
-T-tests on mpg figures for different transmission types.
+* Did the student interpret the coefficients correctly?
+
+* Did the student fit multiple models and detail their strategy for model selection?
+
+* Did the student answer the questions of interest or detail why the question(s) is (are) not answerable?
+
+* Did the student do a residual plot and some diagnostics?
+    
+* Did the student quantify the uncertainty in their conclusions and/or perform an inference correctly?
+
+* Was the report brief (about 2 pages long) for the main body of the report and no longer than 5 with supporting appendix of figures?
+
+
+* Did the student do some exploratory data analyses?
+
+An initial exploration of the data only focusing on transmission type, using T-Test, shows that the manual transmission correspond to higher mpg within 95% of confidence.
+For that we assume that the measurements of mpg and its gear type are independent and identically distributed.
 
 ```{r}
 mpg_aut <- mtcars[mtcars$am==0, "mpg"]
@@ -29,4 +42,42 @@ mpg_man <- mtcars[mtcars$am==1, "mpg"]
 t.test(mpg_aut, mpg_man, paired=F)
 ```
 
-Some exploratory analysis on data
+We check how other variables are impacted by the inclusion of transmission type in the model. Either confounding and interactions are considered.
+
+```{r}
+vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
+print("Confounding")
+for (v in vars) {
+    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+             lm(as.formula(paste("mpg ~ factor(am) ", v, sep="+")), data=mtcars))
+    if (a$Pr[2] < 0.05) {
+        print(v); print(a$Pr[2])
+    }
+}
+print ("Interaction")
+for (v in vars) {
+    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+             lm(as.formula(paste("mpg ~ factor(am) ", v, sep=":")), data=mtcars))
+    if (a$Pr[2] < 0.05) {
+        print(v); print(a$Pr[2])
+    }
+}
+```
+
+The variables "hp", "qsec" and "carb" have significantly impacted (both methods), with p-value lower that 0.05. They are considered for a refined modelling.
+
+```{r}
+fit_hp <- lm(mpg ~ am + hp, data=mtcars)
+fit_qsec <- lm(mpg ~ am + qsec, data=mtcars)
+fit_carb <- lm(mpg ~ am + carb, data=mtcars)
+
+fit_hp_qsec <- update(fit_hp, mpg ~ am + hp * qsec, data=mtcars)
+anova(fit_hp, fit_hp_qsec) 
+
+fit_hp_carb <- update(fit_hp, mpg ~ am + hp * carb, data=mtcars)
+anova(fit_hp, fit_hp_carb)
+
+fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ am + hp * qsec * carb)
+anova(fit_hp_carb, fit_hp_qsec_carb) # no sig influence
+```
+

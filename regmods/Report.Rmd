@@ -73,11 +73,34 @@ fit_carb <- lm(mpg ~ am + carb, data=mtcars)
 
 fit_hp_qsec <- update(fit_hp, mpg ~ am + hp * qsec, data=mtcars)
 anova(fit_hp, fit_hp_qsec) 
+par(mfrow = c(2, 2)); plot(fit_hp_qsec)
 
 fit_hp_carb <- update(fit_hp, mpg ~ am + hp * carb, data=mtcars)
 anova(fit_hp, fit_hp_carb)
+par(mfrow = c(2, 2)); plot(fit_hp_carb)
 
 fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ am + hp * qsec * carb)
 anova(fit_hp_carb, fit_hp_qsec_carb) # no sig influence
+par(mfrow = c(2, 2)); plot(fit_hp_qsec_carb)
+
 ```
 
+#### Appedix
+
+```{r }
+par(mfrow=c(3,3),mar=c(4,4,1,0), oma=c(0,0,2,0))
+
+with(mtcars, plot(disp, mpg, pch=19, col=am+1))
+with(mtcars, plot(hp, mpg, pch=19, col=am+1)) # good
+with(mtcars, plot(drat, mpg, pch=19, col=am+1))
+with(mtcars, plot(wt, mpg, pch=19, col=am+1))
+with(mtcars, plot(qsec, mpg, pch=19, col=am+1)) # good
+with(mtcars, plot(gear, mpg, pch=19, col=am+1))
+with(mtcars, plot(carb, mpg, pch=19, col=am+1))
+with(mtcars, plot(cyl, mpg, pch=19, col=am+1))
+with(mtcars, plot(am, mpg, pch=19, col=am+1))
+
+legend("top", pch = 19, col = c(0,1)+1, legend = c("Auto", "Man"))
+mtext("Plot 1 - mpg and transmission X other variables",side=3, line=1, outer=TRUE)
+
+```

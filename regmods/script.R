@@ -30,7 +30,6 @@ with(mtcars, plot(hp, mpg, pch=19, col=am+1)) # good
 with(mtcars, plot(drat, mpg, pch=19, col=am+1))
 with(mtcars, plot(wt, mpg, pch=19, col=am+1))
 with(mtcars, plot(qsec, mpg, pch=19, col=am+1)) # good
-
 with(mtcars, plot(gear, mpg, pch=19, col=am+1))
 with(mtcars, plot(carb, mpg, pch=19, col=am+1))
 with(mtcars, plot(cyl, mpg, pch=19, col=am+1))

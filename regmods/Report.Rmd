@@ -1,0 +1,32 @@
+---
+title: "Automatic vs Manual Gear"
+author: "Sandro Vicente"
+date: "Wednesday, June 17, 2015"
+output: html_document
+---
+
+#### Overview
+
+Overview Text
+
+#### Analysis
+
+Analysis text
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(car)
+data(mtcars)
+```
+
+T-tests on mpg figures for different transmission types.
+
+```{r}
+mpg_aut <- mtcars[mtcars$am==0, "mpg"]
+mpg_man <- mtcars[mtcars$am==1, "mpg"]
+
+t.test(mpg_aut, mpg_man, paired=F)
+```
+
+Some exploratory analysis on data

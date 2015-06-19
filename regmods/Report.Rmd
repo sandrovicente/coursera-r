@@ -39,8 +39,9 @@ For that we assume that the measurements of mpg and its gear type are independen
 mpg_aut <- mtcars[mtcars$am==0, "mpg"]
 mpg_man <- mtcars[mtcars$am==1, "mpg"]
 
-t.test(mpg_aut, mpg_man, paired=F)
+t.test(mpg_man, mpg_aut, paired=F)
 ```
+Average mpg tends to be higher for manual transmission with 95% of confidence.
 
 We check how other variables are impacted by the inclusion of transmission type in the model. Either confounding and interactions are considered.
 
@@ -64,25 +65,25 @@ for (v in vars) {
 }
 ```
 
-The variables "hp", "qsec" and "carb" have significantly impacted (both methods), with p-value lower that 0.05. They are considered for a refined modelling.
+The variables "hp", "qsec" and "carb" are significantly impacted (both methods), with p-value lower that 0.05. They are considered for a refined modelling.
 
 ```{r}
-fit_hp <- lm(mpg ~ am + hp, data=mtcars)
-fit_qsec <- lm(mpg ~ am + qsec, data=mtcars)
-fit_carb <- lm(mpg ~ am + carb, data=mtcars)
+fit_hp <- lm(mpg ~ factor(am) + hp -1, data=mtcars)
+fit_qsec <- lm(mpg ~ factor(am) + qsec -1, data=mtcars)
+fit_carb <- lm(mpg ~ factor(am) + factor(carb) -1, data=mtcars)
 
-fit_hp_qsec <- update(fit_hp, mpg ~ am + hp * qsec, data=mtcars)
+fit_hp_qsec <- update(fit_hp, mpg ~ factor(am) + hp * qsec -1)
 anova(fit_hp, fit_hp_qsec) 
 par(mfrow = c(2, 2)); plot(fit_hp_qsec)
 
-fit_hp_carb <- update(fit_hp, mpg ~ am + hp * carb, data=mtcars)
+fit_hp_carb <- update(fit_hp, mpg ~ factor(am) + hp * carb -1)
 anova(fit_hp, fit_hp_carb)
-par(mfrow = c(2, 2)); plot(fit_hp_carb)
+par(mfrow = c(2, 2)); plot(fit_hp_carb) # the best
+summary(fit_hp_carb)$coefficients
 
-fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ am + hp * qsec * carb)
+fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ factor(am) + hp * qsec * carb -1)
 anova(fit_hp_carb, fit_hp_qsec_carb) # no sig influence
 par(mfrow = c(2, 2)); plot(fit_hp_qsec_carb)
-
 ```
 
 #### Appedix
@@ -102,5 +103,4 @@ with(mtcars, plot(am, mpg, pch=19, col=am+1))
 
 legend("top", pch = 19, col = c(0,1)+1, legend = c("Auto", "Man"))
 mtext("Plot 1 - mpg and transmission X other variables",side=3, line=1, outer=TRUE)
-
 ```

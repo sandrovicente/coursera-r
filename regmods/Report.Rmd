@@ -12,8 +12,6 @@ Overview Text
 #### Analysis
 
 ```{r message=FALSE}
-library(ggplot2)
-library(car)
 data(mtcars)
 ```
 
@@ -32,8 +30,11 @@ data(mtcars)
 
 * Did the student do some exploratory data analyses?
 
-An initial exploration of the data only focusing on transmission type, using T-Test, shows that the manual transmission correspond to higher mpg within 95% of confidence.
-For that we assume that the measurements of mpg and its gear type are independent and identically distributed.
+We initially plot the variables with respect to mpg and transmission type in appendix plot 1.
+
+Plot mpg X am shows a trend to higher mpg for manual transmission (red).
+
+We can examine it using T-Test. For that we assume that the measurements of mpg and its gear type are independent and identically distributed.
 
 ```{r}
 mpg_aut <- mtcars[mtcars$am==0, "mpg"]
@@ -41,13 +42,23 @@ mpg_man <- mtcars[mtcars$am==1, "mpg"]
 
 t.test(mpg_man, mpg_aut, paired=F)
 ```
-Average mpg tends to be higher for manual transmission with 95% of confidence.
 
-We check how other variables are impacted by the inclusion of transmission type in the model. Either confounding and interactions are considered.
+It shows the average mpg tends to be higher for manual transmission with 95% of confidence.
+
+A basic linear model involving only mpg and transmission (am) confirms it.
+
+```{r}
+lm0 <- lm(mpg ~ factor(am)-1, data=mtcars)
+summary(lm0)$coefficient
+```
+
+The coeficient for 1 (manual) is higher.
+
+We check other variables against transmission type in the model. Both confounding and interactions are considered.
 
 ```{r}
 vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
-print("Confounding")
+# Confounding
 for (v in vars) {
     a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
              lm(as.formula(paste("mpg ~ factor(am) ", v, sep="+")), data=mtcars))
@@ -55,7 +66,7 @@ for (v in vars) {
         print(v); print(a$Pr[2])
     }
 }
-print ("Interaction")
+# Interaction
 for (v in vars) {
     a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
              lm(as.formula(paste("mpg ~ factor(am) ", v, sep=":")), data=mtcars))
@@ -65,7 +76,7 @@ for (v in vars) {
 }
 ```
 
-The variables "hp", "qsec" and "carb" are significantly impacted (both methods), with p-value lower that 0.05. They are considered for a refined modelling.
+The variables "hp", "qsec" and "carb" are significantly impacted (both methods) by transmission type, with p-value lower that 0.05. They are considered for a refined modelling.
 
 ```{r}
 fit_hp <- lm(mpg ~ factor(am) + hp -1, data=mtcars)
@@ -74,17 +85,18 @@ fit_carb <- lm(mpg ~ factor(am) + factor(carb) -1, data=mtcars)
 
 fit_hp_qsec <- update(fit_hp, mpg ~ factor(am) + hp * qsec -1)
 anova(fit_hp, fit_hp_qsec) 
-par(mfrow = c(2, 2)); plot(fit_hp_qsec)
+summary(fit_hp_qsec)$coefficients ## no good p-values
 
 fit_hp_carb <- update(fit_hp, mpg ~ factor(am) + hp * carb -1)
-anova(fit_hp, fit_hp_carb)
-par(mfrow = c(2, 2)); plot(fit_hp_carb) # the best
-summary(fit_hp_carb)$coefficients
+anova(fit_hp, fit_hp_carb) # best p-values
+summary(fit_hp_carb)$coefficients # best fit
 
 fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ factor(am) + hp * qsec * carb -1)
 anova(fit_hp_carb, fit_hp_qsec_carb) # no sig influence
-par(mfrow = c(2, 2)); plot(fit_hp_qsec_carb)
+summary(fit_hp_qsec_carb)$coefficients # no good p-values
 ```
+
+The model associating mpg to am, hp and carb is the one with best p-values. The analysis of variance also show best results for this model.
 
 #### Appedix
 
@@ -103,4 +115,9 @@ with(mtcars, plot(am, mpg, pch=19, col=am+1))
 
 legend("top", pch = 19, col = c(0,1)+1, legend = c("Auto", "Man"))
 mtext("Plot 1 - mpg and transmission X other variables",side=3, line=1, outer=TRUE)
+
+par(mfrow=c(2,2), mar=c(5,4,1,0), oma=c(0,0,2,0))
+plot(fit_hp_carb) 
+mtext("Plot 2 - Analysis of diagnostic values for fit_hp_carb",side=3, line=1, outer=TRUE)
+
 ```

@@ -1,7 +1,6 @@
 ---
 title: "Automatic vs Manual Gear"
 author: "Sandro Vicente"
-date: "Wednesday, June 17, 2015"
 output: html_document
 ---
 
@@ -39,44 +38,38 @@ We can examine it using T-Test. For that we assume that the measurements of mpg 
 ```{r}
 mpg_aut <- mtcars[mtcars$am==0, "mpg"]
 mpg_man <- mtcars[mtcars$am==1, "mpg"]
-
-t.test(mpg_man, mpg_aut, paired=F)
+t.test(mpg_man, mpg_aut, paired=F)$conf.int
 ```
 
 It shows the average mpg tends to be higher for manual transmission with 95% of confidence.
 
-A basic linear model involving only mpg and transmission (am) confirms it.
+A basic linear model involving only mpg and transmission (am) confirms this.
 
 ```{r}
 lm0 <- lm(mpg ~ factor(am)-1, data=mtcars)
 summary(lm0)$coefficient
 ```
 
-The coeficient for 1 (manual) is higher.
-
-We check other variables against transmission type in the model. Both confounding and interactions are considered.
+However a model involving only these variables may be innacurate. We check other variables against transmission type in the model. Both confounding and interactions are considered.
 
 ```{r}
 vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
 # Confounding
 for (v in vars) {
-    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+    # confounding
+    cf<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
              lm(as.formula(paste("mpg ~ factor(am) ", v, sep="+")), data=mtcars))
-    if (a$Pr[2] < 0.05) {
-        print(v); print(a$Pr[2])
-    }
-}
-# Interaction
-for (v in vars) {
-    a<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
+    # interaction
+    i<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
              lm(as.formula(paste("mpg ~ factor(am) ", v, sep=":")), data=mtcars))
-    if (a$Pr[2] < 0.05) {
-        print(v); print(a$Pr[2])
+
+    if (cf$Pr[2] < 0.05 && i$Pr[2] < 0.05) {
+        print(v); print(cf$Pr[2]); print(i$Pr[2])
     }
 }
 ```
 
-The variables "hp", "qsec" and "carb" are significantly impacted (both methods) by transmission type, with p-value lower that 0.05. They are considered for a refined modelling.
+The variables "hp", "qsec" and "carb" are significantly impacted (both methods) by transmission type, with p-value lower that 0.05. Therefore, they are considered for a refined modelling.
 
 ```{r}
 fit_hp <- lm(mpg ~ factor(am) + hp -1, data=mtcars)
@@ -97,6 +90,8 @@ summary(fit_hp_qsec_carb)$coefficients # no good p-values
 ```
 
 The model associating mpg to am, hp and carb is the one with best p-values. The analysis of variance also show best results for this model.
+
+The coeficients are still consistent with the first test involving only transmission. Based on the data in mtcars, manual transmission is associated to higher mpg with 95% of confidence.  
 
 #### Appedix
 

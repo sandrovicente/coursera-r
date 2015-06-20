@@ -115,10 +115,32 @@ abline(fit2,col="green")
 fit7 <- update(fit4, mpg ~ factor(cyl)+wt+factor(cyl)*wt-1)
 anova(fit4,fit7)
 
-# 
+# Q2 - The wording is tricky, pay close attention
 
-fit4 <- lm(mpg ~ wt + factor(cyl)-1, data=mtcars) ## invalid. It determines for the level only!!
+fit3 <- lm(mpg ~ factor(cyl) - 1, data=mtcars)
+fit4 <- lm(mpg ~ factor(cyl) + wt -1, data=mtcars) ## invalid. It determines for the level only!!
+
+summary(fit3)$coefficients
+summary(fit4)$coefficients
+
+f <- function(c4, c6, c8, fit) { s <- summary(fit)$coefficients; c4*s[1,1] + c6*s[2,1] + c8*s[3,1]}
+
+c(f(1,0,0,fit3)-f(0,1,0,fit3), f(0,1,0,fit3)-f(0,0,1,fit3)) 
+c(f(1,0,0,fit4)-f(0,1,0,fit4), f(0,1,0,fit4)-f(0,0,1,fit4))
+
+## Q4 - The wording is even trickier... I really didn't get what was expected here....
+
+fit7<- lm(mpg ~ I(wt) + factor(cyl)-1, data = mtcars)
 fit8 <- lm(mpg ~ I(wt * 0.5) + factor(cyl)-1, data = mtcars)
+
+summary(fit7)$coefficients
+summary(fit8)$coefficients
+f <- function(w, fit) { w* summary(fit)$coefficients[1,1]}
+
+f(1, fit7)
+f(1, fit8)
+# num cylinders don't cause impact
+# duplo impact in wt for fit8 => half change 
 
 ####
 

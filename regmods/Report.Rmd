@@ -1,12 +1,13 @@
 ---
-title: "Automatic vs Manual Gear"
+title: "Automatic vs Manual Gear Analysis"
 author: "Sandro Vicente"
 output: html_document
 ---
 
-#### Overview
+#### Summary
 
-Overview Text
+In this report, we perform the analysis of data from 'mtcars' dataset in order to identify wheather automatic or manual transmission correspond to better MPG figures. Also we quantify the difference in MPG between transmission types (am).
+In order to achive that, we perform a initial exploratory analysis over the data, then analyse models involving the mpg as result of am and other variables. We reach to a final model by adding variables whose inclusion present best p-values in the analysis of variance.
 
 #### Analysis
 
@@ -16,18 +17,7 @@ data(mtcars)
 ```
 
 We initially plot the variables with respect to mpg and transmission type in appendix plot 1.
-
 Plot mpg X am shows a trend to higher mpg for manual transmission (red).
-
-We can examine it using T-Test. For that we assume that the measurements of mpg and its gear type are independent and identically distributed.
-
-```{r}
-mpg_aut <- mtcars[mtcars$am==0, "mpg"]
-mpg_man <- mtcars[mtcars$am==1, "mpg"]
-t.test(mpg_man, mpg_aut, paired=F)$conf.int
-```
-
-It shows the average mpg tends to be higher for manual transmission with 95% of confidence.
 
 A basic linear model involving only mpg and transmission (am) confirms this.
 
@@ -36,7 +26,7 @@ lm0 <- lm(mpg ~ factor(am)-1, data=mtcars)
 summary(lm0)$coefficient
 ```
 
-However a model involving only these variables may be innacurate. We check other variables against transmission type in the model. Both confounding and interactions are considered.
+However a model involving only these variables may be innacurate and biased. We check other variables against transmission type in the model and select the ones whose inclusion present signficant p-values (< 0.05) in the analysis of variance . Both confounding and interactions are considered.
 
 ```{r}
 vars <- c("cyl", "disp", "hp", "drat", "wt", "qsec", "gear", "carb" )
@@ -47,47 +37,46 @@ for (v in vars) {
     # interaction only
     i<-anova(lm(as.formula(paste("mpg ", v, sep="~")), data=mtcars),
              lm(as.formula(paste("mpg ~ factor(am) ", v, sep=":")), data=mtcars))
-
-    if (cf$Pr[2] < 0.05 && i$Pr[2] < 0.05) {
-        print(v); print(cf$Pr[2]); print(i$Pr[2])
-    }
+    if (cf$Pr[2] < 0.05 && i$Pr[2] < 0.05) { print(data.frame(name=v,cf.pval=cf$Pr[2],i.pval=i$Pr[2])); }
 }
 ```
 
-The variables "hp", "qsec" and "carb" are significantly impacted (both methods) by transmission type, with p-value lower that 0.05. Therefore, they are considered for a refined modelling.
+The variables "hp", "qsec" and "carb" are significant (considering both methods) to be added in a model with transmission type. These represent the base models. 
+
+New models are generated from the base models by adding the other shortlisted variables. The addition is then validated by observing the p-values for the analysis of variance and for the coefficients. p-value should be < 0.05.
 
 ```{r}
 # base models
 fit_hp <- lm(mpg ~ factor(am) + hp -1, data=mtcars)
 fit_qsec <- lm(mpg ~ factor(am) + qsec -1, data=mtcars)
 fit_carb <- lm(mpg ~ factor(am) + factor(carb) -1, data=mtcars)
-
 # function to show coeficients within specified confidence levels
 sig_coefficients <- function(x, err) { s <- summary(x)$coefficients;s[s[,4]<err,]}
-
 # model 1 - am, hp, qsec
 fit_hp_qsec <- update(fit_hp, mpg ~ factor(am) + hp * qsec -1)
-anova(fit_hp, fit_hp_qsec) 
+# p-value for inclusion of variable in the model
+anova(fit_hp, fit_hp_qsec)$Pr[2]
 sig_coefficients(fit_hp_qsec, 0.05) ## not many good p-values, only 'qsec'
-
 # model 2 - am, hp, carb
 fit_hp_carb <- update(fit_hp, mpg ~ factor(am) + hp * carb -1)
-anova(fit_hp, fit_hp_carb) # best p-values
+# p-value for inclusion of variable in the model
+anova(fit_hp, fit_hp_carb)$Pr[2] # best p-values
 sig_coefficients(fit_hp_carb, 0.05) # best fit
-
 # model 3 - am, hp, qsec, carb
 fit_hp_qsec_carb <- update(fit_hp_carb, mpg ~ factor(am) + hp * qsec * carb -1)
-anova(fit_hp_carb, fit_hp_qsec_carb) # no sig influence
+# p-value for inclusion of variable in the model 
+anova(fit_hp_carb, fit_hp_qsec_carb)$Pr[2] # not much influence
 sig_coefficients(fit_hp_qsec_carb, 0.05) # no good p-values
 ```
 
-Model 2 associating mpg to am, hp and carb is the one with all coeficients have p-values under 0.05. 
+Model 2 associating mpg to am, hp and carb is the one whose all coeficients have p-values under 0.05. 
 
-Plot 2 in the appendix shows the diagnostic analysis for this model. No specific pattern is observed in the residuals charts. Normal Q-Q shows reasonable consistence between quantiles and residuals. Leverage chart shows strong influence of one one data point (Maserati Bora).
+Plot 2 in the appendix shows the diagnostic analysis for this model. No specific pattern is observed in the residuals charts. Normal Q-Q shows reasonable consistence between quantiles and residuals. Leverage chart shows strong influence of only one data point (Maserati Bora).
 
 The coeficients are still consistent with the first test involving only transmission. Based on the data in mtcars, manual transmission is associated to higher mpg with 95% of confidence.  
 
-The model 2 also shows that automatic transimssion corresponds to an increase of 4.73  +/- 2.56 in mpg. 
+From model 2, the coeficients for automatic (0) and manual (1) transimssions are respectively `r fit_hp_carb$coef[1]` and `r fit_hp_carb$coef[2]`, so for manual there is an increase of 4.73  +/- 2.06 in mpg. 
+
 
 #### Appedix
 

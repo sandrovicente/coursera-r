@@ -119,3 +119,14 @@ anova(fit4,fit7)
 
 fit4 <- lm(mpg ~ wt + factor(cyl)-1, data=mtcars) ## invalid. It determines for the level only!!
 fit8 <- lm(mpg ~ I(wt * 0.5) + factor(cyl)-1, data = mtcars)
+
+####
+
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+
+fit <- lm(y ~ x)
+
+round(hatvalues(fit)[1 : 5], 3)
+dfbetas(fit)
+

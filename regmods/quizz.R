@@ -164,3 +164,27 @@ or = exp(log$coeff)
 head = or[1]
 tail = or[2]
 
+## q4.2
+
+x2 <- shuttle$magn
+
+log2 <- glm(y ~ x + x2 -1, family="binomial")
+log2$coeff
+or2 = exp(log2$coeff)
+
+# q4.3
+
+y2 <- ifelse(y == 1, 0, 1)
+log3 <- glm(y2 ~ x -1, family="binomial")
+log3$coeff
+
+# q4.4
+
+data(InsectSprays)
+y <- InsectSprays$count
+x <- InsectSprays$spray
+log4 <- glm(y ~ x -1, family="poisson")
+log4$coeff
+log4$coeff[1]/log4$coeff[2]
+
+plot(x,y, pch=19, col="darkgray")

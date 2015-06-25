@@ -184,7 +184,7 @@ data(InsectSprays)
 y <- InsectSprays$count
 x <- InsectSprays$spray
 log4 <- glm(y ~ x -1, family="poisson")
-log4$coeff
-log4$coeff[1]/log4$coeff[2]
+rate <- exp(log4$coeff)
+rate[1]/rate[2]
 
 plot(x,y, pch=19, col="darkgray")

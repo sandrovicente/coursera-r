@@ -130,3 +130,26 @@ fit <- lm(y ~ x)
 round(hatvalues(fit)[1 : 5], 3)
 dfbetas(fit)
 
+# part 4
+library(manipulate)
+par(mfrow=c(1,1))
+
+x<-seq(-10,10,length=1000) 
+manipulate(
+    plot(x,exp(beta0+beta1*x)/(1+exp(beta0+beta1*x)),
+         type="l",lwd=3,frame=FALSE),
+    beta1=slider(-2,2,step=.1,initial=2), 
+    beta0=slider(-2,2,step=.1,initial=0) )
+
+# q.4.1
+
+library(MASS) 
+y <- ifelse(shuttle$use == "auto",1,0)
+x <- shuttle$wind #ifelse(shuttle$wind == "head", 1, 0)
+log <- glm(y ~ x-1, family="binomial")
+log$coefficients
+or = exp(log$coeff)
+# head / tail
+head = or[1]
+tail = or[2]
+head/tail
